@@ -1,24 +1,32 @@
 import { useEffect, useState } from "react";
-import jwt from "jsonwebtoken";
+import { useRouter } from "next/router";
 
 export default function Dashboard() {
-  const [userId, setUserId] = useState("");
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
+    const fetchUser = async () => {
+      const res = await fetch("/api/me");
+      if (res.ok) {
+        const data = await res.json();
+        setUserId(data.userId);
+      } else {
+        router.push("/login");
+      }
+      setLoading(false);
+    };
 
-    if (token) {
-      const decoded = jwt.decode(token) as any;
-      setUserId(decoded.userId);
-    }
-  }, []);
+    fetchUser();
+  }, [router]);
+
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold">Welcome, User: {userId}</h1>
+      <h1 className="text-xl font-bold">Dashboard</h1>
+      <p>Welcome! Your user ID is: {userId}</p>
     </div>
   );
 }

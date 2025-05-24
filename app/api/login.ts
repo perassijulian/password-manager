@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { serialize } from "cookie";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -28,7 +29,17 @@ export default async function handler(
       expiresIn: "1h",
     });
 
-    return res.status(200).json({ token });
+    res.setHeader(
+      "Set-Cookie",
+      serialize("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60, // 1 hour
+      })
+    );
+
+    return res.status(200).json({ success: true });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: "Invalid input" });
