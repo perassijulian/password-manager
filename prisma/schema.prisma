@@ -9,10 +9,11 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
+  id          String       @id @default(cuid())
+  email       String       @unique
+  password    String
+  credentials Credential[]
+  createdAt   DateTime     @default(now())
 }
 
 model Credential {
@@ -20,7 +21,7 @@ model Credential {
   userId    String
   service   String
   username  String
-  password  String   // Encrypted with AES
+  password  String
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])

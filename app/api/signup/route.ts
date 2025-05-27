@@ -1,7 +1,8 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import argon2 from "argon2";
 import { z } from "zod";
-import type { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 const schema = z.object({
@@ -9,28 +10,33 @@ const schema = z.object({
   password: z.string().min(6),
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "POST") return res.status(405).end();
-
+export async function POST(req: NextRequest) {
   try {
-    const { email, password } = schema.parse(req.body);
+    const body = await req.json();
+    const { email, password } = schema.parse(body);
     const hashedPassword = await argon2.hash(password);
 
     const user = await prisma.user.create({
       data: { email, password: hashedPassword },
     });
 
-    res.status(201).json({ message: "User created", userId: user.id });
+    return NextResponse.json(
+      { message: "User created", userId: user.id },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
-        return res.status(409).json({ error: "Email already in use" });
+        return NextResponse.json(
+          { error: "Email already in use" },
+          { status: 409 }
+        );
       }
     }
 
-    res.status(400).json({ error: "Invalid input or server error" });
+    return NextResponse.json(
+      { error: "Invalid input or server error" },
+      { status: 500 }
+    );
   }
 }
