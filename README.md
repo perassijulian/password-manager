@@ -41,3 +41,24 @@ In our case, middleware is used responsibly:
 - ❌ No DB reads or heavy computations
 
 This approach ensures good performance while keeping protected areas secure.
+
+# 🔐 Insights from [OWASP API Security](https://owasp.org/www-project-api-security/) Top 10 (2023)
+
+After reading the first two points of the OWASP API Security Project, here are the key takeaways:
+
+1. [Broken Object Level Authorization (BOLA)](https://owasp.org/API-Security/editions/2023/en/0xa2-broken-authentication/)
+
+- BOLA is a common and easy-to-exploit vulnerability where attackers manipulate object IDs in API requests (e.g., user IDs or resource IDs).
+- The server executes the action without properly verifying that the requester owns or has access to the resource.
+- To prevent this, APIs must enforce object-level authorization checks, such as extracting the authenticated user’s ID from the JWT token and validating access accordingly.
+
+2. [Broken Authentication](https://owasp.org/API-Security/editions/2023/en/0xa2-broken-authentication/)
+
+- Authentication mechanisms are high-risk targets since they are exposed to all users.
+- Best practices include:
+- Re-authentication for sensitive operations (e.g., password changes, deleting data)
+- Using established standards for password storage, authentication, and token handling
+- Avoiding custom or untested implementations
+- Important reminder: OAuth is an authorization framework, not an authentication method. Understand the distinction before implementing auth flows.
+
+These points serve as a strong reminder that secure-by-design principles are essential when building authentication and authorization logic in APIs.

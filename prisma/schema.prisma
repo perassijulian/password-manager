@@ -14,3 +14,14 @@ model User {
   password  String
   createdAt DateTime @default(now())
 }
+
+model Credential {
+  id        String   @id @default(cuid())
+  userId    String
+  service   String
+  username  String
+  password  String   // Encrypted with AES
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
