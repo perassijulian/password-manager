@@ -62,3 +62,13 @@ After reading the first two points of the OWASP API Security Project, here are t
 - Important reminder: OAuth is an authorization framework, not an authentication method. Understand the distinction before implementing auth flows.
 
 These points serve as a strong reminder that secure-by-design principles are essential when building authentication and authorization logic in APIs.
+
+# 🔐 Encryption Algorithm Choice
+
+Based on the OWASP Cryptographic Storage Cheat Sheet, we have chosen AES (Advanced Encryption Standard) as the encryption algorithm for securely storing sensitive user data in our application.
+
+Whenever possible, we will use AES in an authenticated encryption mode, such as AES-GCM or AES-CCM
+
+If authenticated modes are not available due to platform or library limitations, we will fall back to AES-CTR or AES-CBC.
+
+On the decision of the encryption algorithm we found an interesting improvement I detail in [why-reading-docs-is-important](./why-reading-docs-is-important.md)
