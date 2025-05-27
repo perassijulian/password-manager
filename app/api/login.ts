@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import argon2 from "argon2";
 import { serialize } from "cookie";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -21,7 +21,7 @@ export default async function handler(
     const { email, password } = loginSchema.parse(req.body);
 
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user || !(await argon2.verify(password, user.password))) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 

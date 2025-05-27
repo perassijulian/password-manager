@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import argon2 from "argon2";
 import { z } from "zod";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
@@ -17,7 +17,7 @@ export default async function handler(
 
   try {
     const { email, password } = schema.parse(req.body);
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await argon2.hash(password);
 
     const user = await prisma.user.create({
       data: { email, password: hashedPassword },
