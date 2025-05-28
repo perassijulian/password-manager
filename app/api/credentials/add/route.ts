@@ -1,25 +1,28 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/crypto";
 import { verifyToken } from "@/utils/verifyToken";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "POST") return res.status(405).end();
-
-  const token = req.cookies.token;
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const token = req.cookies.get("token")?.value;
   if (!token)
-    return res.status(401).json({ error: "Unauthorized, missing token" });
+    return NextResponse.json(
+      { error: "Unauthorized, missing token" },
+      { status: 401 }
+    );
   const payload = await verifyToken(token);
   if (!payload)
-    return res.status(401).json({ error: "Unauthorized, missing payload" });
+    return NextResponse.json(
+      { error: "Unauthorized, missing payload" },
+      { status: 401 }
+    );
 
-  const { service, username, password } = req.body;
+  const { service, username, password } = body;
 
   if (!service || !username || !password) {
-    return res.status(400).json({ error: "Missing fields" });
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
   const encryptedPassword = encrypt(password);
@@ -33,5 +36,5 @@ export default async function handler(
     },
   });
 
-  return res.status(201).json({ credential });
+  return NextResponse.json({ credential }, { status: 201 });
 }
