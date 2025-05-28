@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import CredentialForm from "@/components/CredentialForm";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function Dashboard() {
     <div className="p-4">
       <h1 className="text-xl font-bold">Dashboard</h1>
       <p>Welcome! Your user ID is: {userId}</p>
+      <CredentialForm />
     </div>
   );
 }

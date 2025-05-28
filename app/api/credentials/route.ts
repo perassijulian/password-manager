@@ -1,4 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { decrypt } from "@/lib/crypto";
 import { verifyToken } from "@/utils/verifyToken";
@@ -10,16 +11,19 @@ type Credential = {
   password: string;
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const token = req.cookies.token;
+export async function GET(req: NextRequest) {
+  const token = req.cookies.get("token")?.value;
   if (!token)
-    return res.status(401).json({ error: "Unauthorized, missing token" });
+    return NextResponse.json(
+      { error: "Unauthorized, missing token" },
+      { status: 401 }
+    );
   const payload = await verifyToken(token);
   if (!payload)
-    return res.status(401).json({ error: "Unauthorized, missing payload" });
+    return NextResponse.json(
+      { error: "Unauthorized, missing payload" },
+      { status: 401 }
+    );
 
   const credentials = await prisma.credential.findMany({
     where: { userId: payload.userId },
@@ -30,8 +34,12 @@ export default async function handler(
     id: c.id,
     service: c.service,
     username: c.username,
-    password: decrypt(c.password),
+    password:
+      decrypt(c.password).slice(0, 2) + "*****" + decrypt(c.password).slice(-2),
+    // Note: For security, we only show the first 2 and last 2 characters of the decrypted password
+    // to show that the decryption was successful without exposing the full password.
+    // If you need the full password, you must re-authenticate.
   }));
 
-  res.status(200).json({ credentials: decrypted });
+  return NextResponse.json({ credentials: decrypted }, { status: 200 });
 }
