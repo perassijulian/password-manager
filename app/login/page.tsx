@@ -69,6 +69,23 @@ export default function Login() {
         >
           Login
         </button>
+        <p className="text-center text-sm text-gray-500">
+          By logging in, you agree to our{" "}
+          <a href="/terms" className="text-blue-500 hover:underline">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" className="text-blue-500 hover:underline">
+            Privacy Policy
+          </a>
+          .
+        </p>
+        <p className="text-center text-sm text-gray-500">
+          Don't have an account?{" "}
+          <a href="/signup" className="text-blue-500 hover:underline">
+            Sign Up
+          </a>
+        </p>
       </form>
     </div>
   );
