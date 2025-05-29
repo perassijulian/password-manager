@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import CredentialForm from "@/components/CredentialForm";
+import CredentialDrawer from "@/components/CredentialDrawer";
 import CredentialsList from "@/components/CredentialsList";
 
 export default function Dashboard() {
@@ -31,7 +31,7 @@ export default function Dashboard() {
     <div className="relative min-h-screen p-4 pb-28 w-full">
       <h1 className="text-xl font-bold">Dashboard</h1>
       <CredentialsList />
-      <CredentialForm />
+      <CredentialDrawer />
     </div>
   );
 }

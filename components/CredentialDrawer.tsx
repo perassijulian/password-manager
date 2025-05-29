@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Plus } from "lucide-react";
+import { EyeOff, Plus } from "lucide-react";
 
-export default function CredentialForm() {
+export default function CredentialDrawer() {
   const [form, setForm] = useState({ service: "", username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
