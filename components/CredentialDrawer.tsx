@@ -29,7 +29,7 @@ export default function CredentialDrawer() {
           onClick={() => setShowForm((prev) => !prev)}
           isOpen={showForm}
         />
-        <CredentialForm />
+        <CredentialForm onClick={() => setShowForm((prev) => !prev)} />
       </div>
     </>
   );

@@ -1,6 +1,7 @@
+import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 
-export default function CredentialForm({}: {}) {
+export default function CredentialForm({ onClick }: { onClick: () => void }) {
   const [form, setForm] = useState({ service: "", username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -68,11 +69,12 @@ export default function CredentialForm({}: {}) {
           onClick={() => setShowPassword(!showPassword)}
           className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-blue-600"
         >
-          {showPassword ? "Hide" : "Show"}
+          {showPassword ? <EyeClosed /> : <Eye />}
         </button>
       </div>
 
       <button
+        onClick={onClick}
         type="submit"
         disabled={loading}
         className="w-full bg-blue-600 text-white rounded-xl py-2 font-medium hover:bg-blue-700 transition"
