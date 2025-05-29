@@ -33,7 +33,7 @@ export default function CredentialForm({}: {}) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-md mx-auto p-6 bg-white rounded-2xl shadow-lg space-y-4"
+      className="max-w-md mx-auto p-6 bg-white space-y-4"
     >
       <h2 className="text-xl font-semibold">Add Credential</h2>
       <input
