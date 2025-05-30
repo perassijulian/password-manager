@@ -13,7 +13,9 @@
     "@prisma/client": "^6.8.2",
     "argon2": "^0.43.0",
     "cookie": "^1.0.2",
+    "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.511.0",
     "next": "15.1.8",
     "next-auth": "^4.24.11",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
