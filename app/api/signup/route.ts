@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import argon2 from "argon2";
 import { z } from "zod";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { getClientIp } from "@/utils/getClientIp";
+import { rateLimiter } from "@/lib/rateLimiter";
 
 const schema = z.object({
   email: z.string().email(),
@@ -12,6 +14,20 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    if (!ip)
+      return NextResponse.json(
+        { error: "IP address not found" },
+        { status: 400 }
+      );
+
+    const { success } = await rateLimiter.limit(ip);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests, please try again later." },
+        { status: 429 }
+      );
+    }
     const body = await req.json();
     const { email, password } = schema.parse(body);
     const hashedPassword = await argon2.hash(password);
