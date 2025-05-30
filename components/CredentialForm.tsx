@@ -34,7 +34,7 @@ export default function CredentialForm({ onClick }: { onClick: () => void }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-md mx-auto p-6 bg-white space-y-4"
+      className="max-w-md mx-auto p-6 bg-gradient-to-t from-gray-50 to-white backdrop-blur-sm border-t border-gray-200 space-y-4"
     >
       <h2 className="text-xl font-semibold">Add Credential</h2>
       <input

@@ -28,7 +28,7 @@ export default function Dashboard() {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="relative min-h-screen p-4 pb-28 w-full">
+    <div className="relative min-h-screen bg-gray-50 p-4 pb-28 w-full">
       <h1 className="text-xl font-bold">Dashboard</h1>
       <CredentialsList />
       <CredentialDrawer />
