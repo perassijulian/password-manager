@@ -12,6 +12,21 @@ export default function Dashboard() {
   const [userId, setUserId] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
 
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/logout", {
+        method: "POST",
+      });
+      if (res.ok) {
+        router.push("/login");
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
       const res = await fetch("/api/me");
@@ -50,7 +65,7 @@ export default function Dashboard() {
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
           <button
-            onClick={() => router.push("/logout")}
+            onClick={handleLogout}
             className="p-2 rounded-full transition text-red-500 hover:text-red-700"
             title="Log Out"
           >
