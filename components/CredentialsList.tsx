@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Eye, EyeOff, ClipboardCheck, Copy } from "lucide-react";
 
 type Credential = {
   id: string;
@@ -14,6 +15,7 @@ export default function CredentialsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [revealed, setRevealed] = useState<{ [key: string]: boolean }>({});
+  const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     async function fetchCredentials() {
@@ -36,6 +38,12 @@ export default function CredentialsList() {
   function toggleReveal(id: string) {
     setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
   }
+
+  const handleCopy = async (id: string, password: string) => {
+    await navigator.clipboard.writeText(password);
+    setCopied((prev) => ({ ...prev, [id]: true }));
+    setTimeout(() => setCopied((prev) => ({ ...prev, [id]: false })), 1500);
+  };
 
   if (loading)
     return <p className="text-center mt-6 text-gray-600">Loading...</p>;
@@ -63,17 +71,21 @@ export default function CredentialsList() {
           <div className="flex space-x-2">
             <button
               onClick={() => toggleReveal(cred.id)}
-              className="text-blue-600 text-sm hover:underline"
+              className="text-blue-600 hover:text-blue-800"
             >
-              {revealed[cred.id] ? "Hide" : "Show"}
+              {revealed[cred.id] ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
             <button
               onClick={() => {
-                navigator.clipboard.writeText(cred.password);
+                handleCopy(cred.id, cred.password);
               }}
-              className="text-sm text-gray-600 hover:underline"
+              className="text-blue-600 hover:text-blue-800"
             >
-              Copy
+              {copied[cred.id] ? (
+                <ClipboardCheck size={20} />
+              ) : (
+                <Copy size={20} />
+              )}
             </button>
           </div>
         </div>
