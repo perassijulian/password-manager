@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import CredentialDrawer from "@/components/CredentialDrawer";
 import CredentialsList from "@/components/CredentialsList";
+import { DoorOpen, Moon, Sun } from "lucide-react";
 
 export default function Dashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -25,11 +27,37 @@ export default function Dashboard() {
     fetchUser();
   }, [router]);
 
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   if (loading) return <p>Loading...</p>;
 
   return (
     <div className="relative min-h-screen bg-gray-50 p-4 pb-28 w-full">
-      <h1 className="text-xl font-bold">Dashboard</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-xl font-bold">Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setDarkMode((prev) => !prev)}
+            className="p-2 rounded-full transition"
+            title="Toggle Dark Mode"
+          >
+            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button
+            onClick={() => router.push("/logout")}
+            className="p-2 rounded-full transition text-red-500 hover:text-red-700"
+            title="Log Out"
+          >
+            <DoorOpen size={20} />
+          </button>
+        </div>
+      </div>
       <CredentialsList />
       <CredentialDrawer />
     </div>
