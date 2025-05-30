@@ -54,21 +54,22 @@ export default function CredentialsList() {
     );
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 space-y-4">
+    <div className="max-w-3xl mx-auto mt-2 space-y-4">
       <h2 className="text-xl font-semibold mb-4">Your Credentials</h2>
       {credentials.map((cred) => (
         <div
           key={cred.id}
-          className="p-4 bg-white border rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between space-y-2 md:space-y-0"
+          className="p-5 bg-white border border-gray-200 rounded-2xl shadow-md transition hover:shadow-lg flex flex-col md:flex-row md:items-center justify-between space-y-3 md:space-y-0"
         >
           <div className="flex-1 space-y-1">
-            <p className="font-medium text-gray-800">{cred.service}</p>
-            <p className="text-sm text-gray-600">{cred.username}</p>
-            <p className="text-sm text-gray-800">
+            <p className="text-lg font-medium text-gray-900">{cred.service}</p>
+            <p className="text-sm text-gray-500">{cred.username}</p>
+            <p className="text-md text-gray-800 tracking-wider">
               {revealed[cred.id] ? cred.password : "••••••••"}
             </p>
           </div>
-          <div className="flex space-x-2">
+
+          <div className="flex gap-3 items-center justify-end">
             <button
               onClick={() => toggleReveal(cred.id)}
               className="text-blue-600 hover:text-blue-800"
