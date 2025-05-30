@@ -72,3 +72,30 @@ Whenever possible, we will use AES in an authenticated encryption mode, such as 
 If authenticated modes are not available due to platform or library limitations, we will fall back to AES-CTR or AES-CBC.
 
 On the decision of the encryption algorithm we found an interesting improvement I detail in [why-reading-docs-is-important](./why-reading-docs-is-important.md)
+
+# API Rate Limiting
+
+## Introduction
+
+After reading [What is API Rate Limiting?](https://datadome.co/bot-management-protection/what-is-api-rate-limiting/), I understand the importance of implementing rate limiting as a fundamental security and performance measure.
+
+Rate limiting helps prevent request overflow, securing limited backend resources from misuse. Without it, malicious actors can exploit the system—whether by harvesting data, spamming endpoints, or launching Distributed Denial of Service (DDoS) attacks—which could prevent legitimate users from accessing the API.
+
+A well-implemented rate limiting strategy makes the system more resilient. In some cases, it can be complemented by CAPTCHA or other bot detection mechanisms when abnormal traffic is detected.
+
+## Key Takeaways from Zuplo's 10 Best Practices for API Rate Limiting (2025)
+
+Reading [Zuplo’s blog post](https://zuplo.com/blog/2025/01/06/10-best-practices-for-api-rate-limiting-in-2025), these are the concepts that resonated the most:
+
+- **Choose the Right Algorithm**  
+  Different algorithms (e.g. Token Bucket, Leaky Bucket, Fixed Window Counter, Sliding Log) serve different needs. Picking the appropriate one depends on your specific use case.
+
+- **Understand Your Clients**  
+  Before defining your limits, you need to understand your users' behavior. Different user types might require different thresholds.
+
+- **Use Caching to Reduce Load**  
+  Implement caching strategies to minimize redundant API calls. This helps reduce strain on your backend and improves performance.
+
+## Conclusion
+
+There are many angles to consider when implementing rate limiting, from algorithms to user profiling and caching. However, for our use case, we’ll begin with a basic rate limit of **5 requests per minute** per user or IP. If the application grows and usage patterns become more complex, we’ll revisit and refine our strategy based on real user behavior and scaling needs.
