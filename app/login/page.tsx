@@ -20,17 +20,24 @@ export default function Login() {
 
   const onSubmit = async (data: FormData) => {
     setError("");
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    if (res.ok) {
-      router.push("/dashboard");
-    } else {
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
       const result = await res.json();
-      setError(result.error || "Login failed");
+      if (res.ok) {
+        result.requires2FA
+          ? router.push("/2fa/verify")
+          : router.push("/2fa/setup");
+      } else {
+        setError(result.error || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("An unexpected error occurred. Please try again later.");
+      return;
     }
   };
 

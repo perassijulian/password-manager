@@ -6,6 +6,10 @@ import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { getClientIp } from "@/utils/getClientIp";
 import { rateLimiter } from "@/lib/rateLimiter";
+import jwt from "jsonwebtoken";
+import { serialize } from "cookie";
+
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,11 +28,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = req.cookies.get("token")?.value;
-    if (!token)
+    const temp_token = req.cookies.get("temp_token")?.value;
+    if (!temp_token)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const payload = await verifyToken(token);
+    const payload = await verifyToken(temp_token);
     if (!payload)
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });
 
@@ -54,7 +58,36 @@ export async function POST(req: NextRequest) {
     if (!valid)
       return NextResponse.json({ error: "Invalid code" }, { status: 403 });
 
-    return NextResponse.json({ success: true });
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    const cookie = serialize("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60, // 1 hour
+    });
+
+    const response = NextResponse.json({ success: true });
+    response.headers.set(
+      "Set-Cookie",
+      [
+        serialize("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          path: "/",
+          maxAge: 60 * 60, // 1 hour
+        }),
+        serialize("temp_token", "", {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          path: "/",
+          maxAge: 0,
+        }),
+      ].join(", ")
+    );
+    return response;
   } catch (error) {
     console.error("Error in 2FA verification:", error);
     return NextResponse.json(

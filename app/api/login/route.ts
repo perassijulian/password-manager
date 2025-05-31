@@ -42,18 +42,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
-      expiresIn: "1h",
+    const tempToken = jwt.sign({ userId: user.id }, JWT_SECRET, {
+      expiresIn: "5m",
     });
 
-    const cookie = serialize("token", token, {
+    const cookie = serialize("temp_token", tempToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60, // 1 hour
+      maxAge: 60 * 5, // 5 minutes
     });
 
-    const response = NextResponse.json({ success: true });
+    const response = NextResponse.json({
+      success: true,
+      requires2FA: user.twoFactorEnabled,
+    });
     response.headers.set("Set-Cookie", cookie);
     return response;
   } catch (error) {
