@@ -99,3 +99,21 @@ Reading [Zuplo’s blog post](https://zuplo.com/blog/2025/01/06/10-best-practice
 ## Conclusion
 
 There are many angles to consider when implementing rate limiting, from algorithms to user profiling and caching. However, for our use case, we’ll begin with a basic rate limit of **5 requests per minute** per user or IP. If the application grows and usage patterns become more complex, we’ll revisit and refine our strategy based on real user behavior and scaling needs.
+
+# 2FA (Two-Factor Authentication)
+
+When implementing 2FA, I found it surprisingly tricky to locate objective and straightforward resources. Many blogs and websites were biased, often pushing their own commercial solutions.
+
+After exploring several options, the most consistently recommended package I came across was otplib. It stood out due to its:
+
+- High number of GitHub ⭐ stars and forks
+- Strong contributor base
+- Compatibility with apps like Google Authenticator
+
+These factors led me to choose the following stack for my TOTP-based 2FA system:
+
+- otplib – for generating and validating TOTP codes
+- qrcode – to display a scannable QR code
+- zod – to validate the inputs and enforce strong type safety
+
+This setup allows users to scan a QR code with an authenticator app, and then input their 6-digit code to securely log in. It’s modern, lightweight, and developer-friendly.

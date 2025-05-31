@@ -39,19 +39,6 @@ export default function CredentialsList() {
     setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
-  //Reauthenticate user before copying
-  /**
-  const res = await fetch("/api/reauthenticate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  if (!res.ok) {
-    setError("Reauthentication failed. Please try again.");
-    return;
-  }
-     */
   // Copy password to clipboard
   const handleCopy = async (id: string) => {
     try {
