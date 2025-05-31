@@ -39,10 +39,42 @@ export default function CredentialsList() {
     setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
-  const handleCopy = async (id: string, password: string) => {
-    await navigator.clipboard.writeText(password);
-    setCopied((prev) => ({ ...prev, [id]: true }));
-    setTimeout(() => setCopied((prev) => ({ ...prev, [id]: false })), 1500);
+  //Reauthenticate user before copying
+  /**
+  const res = await fetch("/api/reauthenticate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) {
+    setError("Reauthentication failed. Please try again.");
+    return;
+  }
+     */
+  // Copy password to clipboard
+  const handleCopy = async (id: string) => {
+    try {
+      // TODO Reauthenticate user before copying
+      const res = await fetch(`/api/credentials/${id}/copy`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      const { password } = await res.json();
+      await navigator.clipboard.writeText(password);
+      setCopied((prev) => ({ ...prev, [id]: true }));
+      setTimeout(() => setCopied((prev) => ({ ...prev, [id]: false })), 1500);
+    } catch (error) {
+      console.error("Failed to copy password:", error);
+      return;
+    }
   };
 
   if (loading)
@@ -78,7 +110,7 @@ export default function CredentialsList() {
             </button>
             <button
               onClick={() => {
-                handleCopy(cred.id, cred.password);
+                handleCopy(cred.id);
               }}
               className="text-blue-600 hover:text-blue-800"
             >
