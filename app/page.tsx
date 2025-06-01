@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/Button";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
@@ -19,21 +20,18 @@ export default function Home() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="px-6 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition"
-          >
+          <Button onClick={() => router.push("/dashboard")}>
             Go to Dashboard
-          </button>
-
-          <a
-            href="https://github.com/perassijulian/password-manager"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-6 py-3 rounded-xl border border-gray-300 text-gray-800 hover:bg-gray-100 transition"
-          >
-            View on GitHub
-          </a>
+          </Button>
+          <Button asChild variant="tertiary">
+            <a
+              href="https://github.com/perassijulian/password-manager"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on GitHub
+            </a>
+          </Button>
         </div>
       </div>
     </main>
