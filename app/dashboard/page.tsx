@@ -5,12 +5,17 @@ import { useRouter } from "next/navigation";
 import CredentialDrawer from "@/components/CredentialDrawer";
 import CredentialsList from "@/components/CredentialsList";
 import { DoorOpen, Moon, Sun } from "lucide-react";
+import Toast from "@/components/Toast";
 
 export default function Dashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "error" | "success" | "info";
+  } | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -20,10 +25,13 @@ export default function Dashboard() {
       if (res.ok) {
         router.push("/login");
       } else {
-        console.error("Logout failed");
+        setToast({ message: "Logout failed", type: "error" });
       }
     } catch (error) {
-      console.error("Logout failed:", error);
+      setToast({
+        message: "An unexpected error occurred. Please try again later.",
+        type: "error",
+      });
     }
   };
 
@@ -56,6 +64,13 @@ export default function Dashboard() {
     <div className="relative min-h-screen bg-gray-50 p-4 pb-28 w-full">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Dashboard</h1>
+        {toast && (
+          <Toast
+            message="{toast.message}"
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setDarkMode((prev) => !prev)}

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import Toast from "@/components/Toast";
 
 const formSchema = z.object({
   code: z
@@ -16,7 +17,10 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function Setup() {
   const [qrCode, setQrCode] = useState("");
-  const [error, setError] = useState("");
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "error" | "success" | "info";
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -38,7 +42,10 @@ export default function Setup() {
         setQrCode(data.qrCode);
       } catch (err) {
         console.error(err);
-        setError("Unable to load QR code. Please try again.");
+        setToast({
+          message: "Unable to load QR code. Please try again.",
+          type: "error",
+        });
       }
     };
 
@@ -46,7 +53,7 @@ export default function Setup() {
   }, []);
 
   const onSubmit = async (data: FormData) => {
-    setError("");
+    setToast(null);
     setLoading(true);
     try {
       const res = await fetch("/api/2fa/verify", {
@@ -60,11 +67,14 @@ export default function Setup() {
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        setError(result.error || "Verification failed");
+        setToast({
+          message: result.error || "Verification failed",
+          type: "error",
+        });
       }
     } catch (err) {
       console.error(err);
-      setError("An unexpected error occurred");
+      setToast({ message: "An unexpected error occurred", type: "error" });
     } finally {
       setLoading(false);
     }
@@ -101,7 +111,13 @@ export default function Setup() {
         {errors.code && (
           <p className="text-red-500 text-sm">{errors.code.message}</p>
         )}
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
 
         <button
           type="submit"

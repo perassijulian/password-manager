@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import Toast from "@/components/Toast";
 
 const formSchema = z.object({
   code: z
@@ -15,7 +16,10 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function Verify2FA() {
-  const [error, setError] = useState("");
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "error" | "success" | "info";
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -26,7 +30,7 @@ export default function Verify2FA() {
   } = useForm<FormData>({ resolver: zodResolver(formSchema) });
 
   const onSubmit = async (data: FormData) => {
-    setError("");
+    setToast(null);
     setLoading(true);
     try {
       const res = await fetch("/api/2fa/verify", {
@@ -40,11 +44,14 @@ export default function Verify2FA() {
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        setError(result.error || "Verification failed");
+        setToast({
+          message: result.error || "Verification failed",
+          type: "error",
+        });
       }
     } catch (err) {
       console.error("2FA verify error:", err);
-      setError("An unexpected error occurred");
+      setToast({ message: "An unexpected error occurred", type: "error" });
     } finally {
       setLoading(false);
     }
@@ -72,7 +79,13 @@ export default function Verify2FA() {
         {errors.code && (
           <p className="text-red-500 text-sm">{errors.code.message}</p>
         )}
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
 
         <button
           type="submit"

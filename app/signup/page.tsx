@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signupSchema } from "@/schemas/userSchema";
+import Toast from "@/components/Toast";
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -16,10 +17,13 @@ export default function Signup() {
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(signupSchema) });
   const router = useRouter();
-  const [error, setError] = useState("");
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "error" | "success" | "info";
+  } | null>(null);
 
   const onSubmit = async (data: FormData) => {
-    setError("");
+    setToast(null);
     const res = await fetch("/api/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -30,7 +34,10 @@ export default function Signup() {
       router.push("/login");
     } else {
       const result = await res.json();
-      setError(result.error || "Signup failed");
+      setToast({
+        message: result.error || "Signup failed",
+        type: "error",
+      });
     }
   };
 
@@ -41,7 +48,13 @@ export default function Signup() {
         className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4"
       >
         <h1 className="text-2xl font-bold text-center">Sign Up</h1>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
         <div>
           <label>Email</label>
           <input

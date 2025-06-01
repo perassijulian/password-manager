@@ -19,7 +19,7 @@ export default function Login() {
   const router = useRouter();
   const [toast, setToast] = useState<{
     message: string;
-    type: "error" | "success";
+    type: "error" | "success" | "info";
   } | null>(null);
 
   const onSubmit = async (data: FormData) => {
