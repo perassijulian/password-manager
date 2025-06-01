@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signupSchema } from "@/schemas/userSchema";
 import Toast from "@/components/Toast";
+import Button from "@/components/Button";
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -21,10 +22,12 @@ export default function Login() {
     message: string;
     type: "error" | "success" | "info";
   } | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data: FormData) => {
     setToast(null);
     try {
+      setLoading(true);
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -37,6 +40,7 @@ export default function Login() {
           : router.push("/2fa/setup");
       } else {
         setToast({ message: result.error || "Login failed", type: "error" });
+        setLoading(false);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -44,6 +48,7 @@ export default function Login() {
         message: "An unexpected error occurred. Please try again later.",
         type: "error",
       });
+      setLoading(false);
       return;
     }
   };
@@ -83,21 +88,49 @@ export default function Login() {
             <p className="text-red-500 text-sm">{errors.password.message}</p>
           )}
         </div>
-        <button
-          type="submit"
-          className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
-        >
+        <Button isLoading={loading} type="submit">
           Login
-        </button>
+        </Button>
         <p className="text-center text-sm text-gray-500">
           By logging in, you agree to our{" "}
-          <a href="/terms" className="text-blue-500 hover:underline">
+          {/**
+           * 
+           <a href="/terms" className="text-blue-500 hover:underline">
             Terms of Service
           </a>{" "}
           and{" "}
           <a href="/privacy" className="text-blue-500 hover:underline">
             Privacy Policy
           </a>
+           * 
+           */}
+          <button
+            type="button"
+            onClick={() =>
+              setToast({
+                message:
+                  "Coming Soon. Please ALWAYS read Terms of Service and Privacy Policy.",
+                type: "info",
+              })
+            }
+            className="text-blue-500 hover:underline"
+          >
+            Terms of Service
+          </button>{" "}
+          and{" "}
+          <button
+            type="button"
+            onClick={() =>
+              setToast({
+                message:
+                  "Coming Soon. Please ALWAYS read Terms of Service and Privacy Policy.",
+                type: "info",
+              })
+            }
+            className="text-blue-500 hover:underline"
+          >
+            Privacy Policy
+          </button>
           .
         </p>
         <p className="text-center text-sm text-gray-500">
