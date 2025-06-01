@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import Toast from "@/components/Toast";
+import Button from "@/components/Button";
 
 const formSchema = z.object({
   code: z
@@ -21,7 +22,7 @@ export default function Setup() {
     message: string;
     type: "error" | "success" | "info";
   } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const {
@@ -54,8 +55,8 @@ export default function Setup() {
 
   const onSubmit = async (data: FormData) => {
     setToast(null);
-    setLoading(true);
     try {
+      setIsLoading(true);
       const res = await fetch("/api/2fa/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,57 +77,55 @@ export default function Setup() {
       console.error(err);
       setToast({ message: "An unexpected error occurred", type: "error" });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-xl">
-      <h1 className="text-2xl font-semibold mb-2 text-center">Set up 2FA</h1>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4">
+        <h1 className="text-2xl font-semibold mb-2 text-center">Set up 2FA</h1>
 
-      {qrCode ? (
-        <>
+        {qrCode ? (
+          <>
+            <p className="text-sm text-gray-400 mb-6 text-center">
+              Scan this QR code with your authenticator app:
+            </p>
+            <div className="flex justify-center mb-4">
+              <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
+            </div>
+          </>
+        ) : (
           <p className="text-sm text-gray-400 mb-6 text-center">
-            Scan this QR code with your authenticator app:
+            Loading QR code...
           </p>
-          <div className="flex justify-center mb-4">
-            <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
-          </div>
-        </>
-      ) : (
-        <p className="text-sm text-gray-400 mb-6 text-center">
-          Loading QR code...
-        </p>
-      )}
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <input
-          type="text"
-          inputMode="numeric"
-          placeholder="Enter 6-digit code"
-          maxLength={6}
-          {...register("code")}
-          className="w-full p-2 border border-gray-700 rounded-xl text-center text-lg tracking-widest"
-        />
-        {errors.code && (
-          <p className="text-red-500 text-sm">{errors.code.message}</p>
         )}
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder="Enter 6-digit code"
+            maxLength={6}
+            {...register("code")}
+            className="w-full p-2 border border-gray-700 rounded-xl text-center text-lg tracking-widest"
           />
-        )}
+          {errors.code && (
+            <p className="text-red-500 text-sm">{errors.code.message}</p>
+          )}
+          {toast && (
+            <Toast
+              message={toast.message}
+              type={toast.type}
+              onClose={() => setToast(null)}
+            />
+          )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 disabled:opacity-70"
-        >
-          {loading ? "Verifying..." : "Activate 2FA"}
-        </button>
-      </form>
+          <Button type="submit" disabled={isLoading} isLoading={isLoading}>
+            {isLoading ? "Verifying..." : "Activate 2FA"}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

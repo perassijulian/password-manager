@@ -1,14 +1,15 @@
 import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
+import Button from "./Button";
 
 export default function CredentialForm({ onClick }: { onClick: () => void }) {
   const [form, setForm] = useState({ service: "", username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
     setMessage("");
 
     try {
@@ -28,7 +29,7 @@ export default function CredentialForm({ onClick }: { onClick: () => void }) {
     } catch (err) {
       setMessage("Network error");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }
   return (
@@ -73,14 +74,14 @@ export default function CredentialForm({ onClick }: { onClick: () => void }) {
         </button>
       </div>
 
-      <button
+      <Button
         onClick={onClick}
         type="submit"
-        disabled={loading}
-        className="w-full bg-blue-600 text-white rounded-xl py-2 font-medium hover:bg-blue-700 transition"
+        disabled={isLoading}
+        isLoading={isLoading}
       >
-        {loading ? "Saving..." : "Save Credential"}
-      </button>
+        {isLoading ? "Saving..." : "Save Credential"}
+      </Button>
 
       {message && (
         <p className="text-sm text-center text-gray-700">{message}</p>
