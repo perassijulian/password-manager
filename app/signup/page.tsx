@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signupSchema } from "@/schemas/userSchema";
 import Toast from "@/components/Toast";
+import Button from "@/components/Button";
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -21,23 +22,40 @@ export default function Signup() {
     message: string;
     type: "error" | "success" | "info";
   } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: FormData) => {
     setToast(null);
-    const res = await fetch("/api/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    if (res.ok) {
-      router.push("/login");
-    } else {
-      const result = await res.json();
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        setIsLoading(false);
+        setToast({
+          message: "Signup successful! Redirecting to login...",
+          type: "success",
+        });
+        setTimeout(() => {
+          router.push("/login");
+        }, 2500);
+      } else {
+        const result = await res.json();
+        setToast({
+          message: result.error || "Signup failed",
+          type: "error",
+        });
+        setIsLoading(false);
+      }
+    } catch (error) {
       setToast({
-        message: result.error || "Signup failed",
+        message: "An unexpected error occurred. Please try again later.",
         type: "error",
       });
+      setIsLoading(false);
     }
   };
 
@@ -76,12 +94,9 @@ export default function Signup() {
             <p className="text-red-500 text-sm">{errors.password.message}</p>
           )}
         </div>
-        <button
-          type="submit"
-          className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
-        >
+        <Button isLoading={isLoading} type="submit">
           Sign Up
-        </button>
+        </Button>
       </form>
     </div>
   );

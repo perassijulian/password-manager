@@ -22,12 +22,12 @@ export default function Login() {
     message: string;
     type: "error" | "success" | "info";
   } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: FormData) => {
     setToast(null);
     try {
-      setLoading(true);
+      setIsLoading(true);
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -40,7 +40,7 @@ export default function Login() {
           : router.push("/2fa/setup");
       } else {
         setToast({ message: result.error || "Login failed", type: "error" });
-        setLoading(false);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -48,7 +48,7 @@ export default function Login() {
         message: "An unexpected error occurred. Please try again later.",
         type: "error",
       });
-      setLoading(false);
+      setIsLoading(false);
       return;
     }
   };
@@ -88,7 +88,7 @@ export default function Login() {
             <p className="text-red-500 text-sm">{errors.password.message}</p>
           )}
         </div>
-        <Button isLoading={loading} type="submit">
+        <Button isLoading={isLoading} type="submit">
           Login
         </Button>
         <p className="text-center text-sm text-gray-500">
