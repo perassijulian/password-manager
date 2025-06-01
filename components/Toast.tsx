@@ -12,9 +12,21 @@ interface ToastProps {
 }
 
 const toastColors = {
-  success: "bg-green-500/90 text-white",
-  error: "bg-red-500/90 text-white",
-  info: "bg-blue-500/90 text-white",
+  success: {
+    border: "border-green-500",
+    text: "text-green-900",
+    bg: "bg-green-100/30",
+  },
+  error: {
+    border: "border-red-500",
+    text: "text-red-900",
+    bg: "bg-red-100/30",
+  },
+  info: {
+    border: "border-blue-500",
+    text: "text-blue-900",
+    bg: "bg-blue-100/30",
+  },
 };
 
 export default function Toast({
@@ -39,13 +51,15 @@ export default function Toast({
     };
   }, [duration, onClose]);
 
+  const { border, text, bg } = toastColors[type];
   return (
-    <div className="fixed inset-x-0 top-6 z-50 flex justify-center pointer-events-none">
+    <div className="fixed inset-x-0 top-6 z-50 flex justify-center pointer-events-none w-full">
       <div
         role="alert"
         className={`
-          px-4 py-3 rounded-2xl backdrop-blur-md shadow-xl transition-all duration-300
-          transform ${toastColors[type]}
+          max-w-md w-full mx-6 pointer-events-auto border ${border} ${text} ${bg}
+          backdrop-blur-md rounded-2xl px-4 py-3 shadow-xl
+          transition-all duration-300 transform
           ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}
         `}
       >
