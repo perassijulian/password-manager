@@ -46,6 +46,7 @@ export default function Setup() {
         setQrCode(data.qrCode);
         setSetupUrl(data.otpauth);
       } catch (err) {
+        console.log("Error fetching QR code:", err); // DELETE THIS LINE IN PRODUCTION
         console.error(err);
         setToast({
           message: "Unable to load QR code. Please try again.",

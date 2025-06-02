@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });
 
     const schema = z.object({ code: z.string().length(6) });
-
     const result = schema.safeParse(await req.json());
+
     if (!result.success) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
