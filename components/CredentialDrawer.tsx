@@ -13,7 +13,7 @@ export default function CredentialDrawer() {
   } | null>(null);
 
   return (
-    <>
+    <div className="w-full max-w-md mx-auto">
       {toast && (
         <Toast
           message={toast.message}
@@ -23,7 +23,7 @@ export default function CredentialDrawer() {
       )}
       {/* Add New Credential Tab */}
       {!showForm && (
-        <div className="fixed bottom-0 left-0 z-30 w-full">
+        <div className="fixed bottom-0 inset-x-0  mx-auto max-w-md z-30 w-full">
           <CredentialToggleButton
             onClick={() => setShowForm((prev) => !prev)}
             isOpen={showForm}
@@ -33,7 +33,7 @@ export default function CredentialDrawer() {
 
       {/* Sliding Form */}
       <div
-        className={`fixed bottom-0 left-0 w-full z-20 bg-white border-t transition-transform duration-300 ${
+        className={`fixed bottom-0 inset-x-0 w-full max-w-md mx-auto z-20 bg-white border-t transition-transform duration-300 ${
           showForm ? "translate-y-0" : "translate-y-full"
         }`}
       >
@@ -46,6 +46,6 @@ export default function CredentialDrawer() {
           onClick={() => setShowForm((prev) => !prev)}
         />
       </div>
-    </>
+    </div>
   );
 }
