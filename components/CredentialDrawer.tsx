@@ -3,12 +3,24 @@
 import { useState } from "react";
 import CredentialForm from "./CredentialForm";
 import CredentialToggleButton from "./CredentialToggleButton";
+import Toast from "./Toast";
 
 export default function CredentialDrawer() {
   const [showForm, setShowForm] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "error" | "success" | "info";
+  } | null>(null);
 
   return (
     <>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       {/* Add New Credential Tab */}
       {!showForm && (
         <div className="fixed bottom-0 left-0 z-30 w-full">
@@ -29,7 +41,10 @@ export default function CredentialDrawer() {
           onClick={() => setShowForm((prev) => !prev)}
           isOpen={showForm}
         />
-        <CredentialForm onClick={() => setShowForm((prev) => !prev)} />
+        <CredentialForm
+          setToast={setToast}
+          onClick={() => setShowForm((prev) => !prev)}
+        />
       </div>
     </>
   );

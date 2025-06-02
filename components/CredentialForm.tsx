@@ -2,15 +2,24 @@ import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import Button from "./Button";
 
-export default function CredentialForm({ onClick }: { onClick: () => void }) {
+interface CredentialFormProps {
+  onClick: () => void;
+  setToast: (
+    toast: { message: string; type: "error" | "success" | "info" } | null
+  ) => void;
+}
+
+export default function CredentialForm({
+  onClick,
+  setToast,
+}: CredentialFormProps) {
   const [form, setForm] = useState({ service: "", username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsLoading(true);
-    setMessage("");
 
     try {
       const res = await fetch("/api/credentials/add", {
@@ -21,13 +30,22 @@ export default function CredentialForm({ onClick }: { onClick: () => void }) {
 
       const data = await res.json();
       if (res.ok) {
-        setMessage("Credential saved successfully");
-        setForm({ service: "", username: "", password: "" });
+        setToast({ message: "Credential saved successfully", type: "success" });
+        setTimeout(() => {
+          setForm({ service: "", username: "", password: "" });
+          onClick();
+        }, 500);
       } else {
-        setMessage(data.error || "Error saving credential");
+        setToast({
+          message: data.error || "Error saving credential",
+          type: "error",
+        });
       }
     } catch (err) {
-      setMessage("Network error");
+      setToast({
+        message: "An unexpected error occurred",
+        type: "error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -74,18 +92,9 @@ export default function CredentialForm({ onClick }: { onClick: () => void }) {
         </button>
       </div>
 
-      <Button
-        onClick={onClick}
-        type="submit"
-        disabled={isLoading}
-        isLoading={isLoading}
-      >
+      <Button type="submit" disabled={isLoading} isLoading={isLoading}>
         {isLoading ? "Saving..." : "Save Credential"}
       </Button>
-
-      {message && (
-        <p className="text-sm text-center text-gray-700">{message}</p>
-      )}
     </form>
   );
 }
