@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         twoFactorEnabled: true,
       },
     });
-    return NextResponse.json({ qrCode });
+    return NextResponse.json({ qrCode, otpauth }, { status: 200 });
   } catch (error) {
     console.error("Error in 2FA setup:", error);
     return NextResponse.json(

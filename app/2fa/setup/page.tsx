@@ -7,6 +7,7 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import Toast from "@/components/Toast";
 import Button from "@/components/Button";
+import { set } from "zod/v4";
 
 const formSchema = z.object({
   code: z
@@ -18,6 +19,8 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function Setup() {
   const [qrCode, setQrCode] = useState("");
+  const [setupUrl, setSetupUrl] = useState("");
+  const [renderError, setRenderError] = useState("");
   const [toast, setToast] = useState<{
     message: string;
     type: "error" | "success" | "info";
@@ -41,12 +44,14 @@ export default function Setup() {
         if (!res.ok) throw new Error("Failed to get QR code");
         const data = await res.json();
         setQrCode(data.qrCode);
+        setSetupUrl(data.otpauth);
       } catch (err) {
         console.error(err);
         setToast({
           message: "Unable to load QR code. Please try again.",
           type: "error",
         });
+        setRenderError("Failed to load QR code. Please try again later.");
       }
     };
 
@@ -94,14 +99,29 @@ export default function Setup() {
             <div className="flex justify-center mb-4">
               <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
             </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(setupUrl);
+                setToast({
+                  message: "Setup link copied to clipboard",
+                  type: "info",
+                });
+                window.open(setupUrl, "_blank");
+              }}
+              className="text-sm text-blue-500 hover:underline mx-auto block"
+            >
+              Can't scan? Tap to open or copy link
+            </button>
           </>
+        ) : renderError !== "" ? (
+          <div className="text-sm text-red-500 mx-auto">{renderError}</div>
         ) : (
           <p className="text-sm text-gray-400 mb-6 text-center">
             Loading QR code...
           </p>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <input
             type="text"
             inputMode="numeric"
