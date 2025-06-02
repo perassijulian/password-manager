@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Eye, EyeOff, ClipboardCheck, Copy, Trash2, Check } from "lucide-react";
+import { Eye, EyeOff, Copy, Trash2, Check } from "lucide-react";
+import { set } from "zod/v4";
 
 type Credential = {
   id: string;
@@ -36,7 +37,17 @@ export default function CredentialsList() {
   }, []);
 
   function toggleReveal(id: string) {
-    setRevealed((prev) => ({ ...prev, [id]: !prev[id] }));
+    setRevealed((prev) => {
+      const isRevealed = prev[id] || false;
+      if (isRevealed) {
+        return { ...prev, [id]: false };
+      }
+
+      setTimeout(() => {
+        setRevealed((prev) => ({ ...prev, [id]: false }));
+      }, 2000);
+      return { ...prev, [id]: true };
+    });
   }
 
   // Copy password to clipboard
