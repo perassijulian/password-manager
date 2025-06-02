@@ -48,8 +48,7 @@ export async function POST(req: NextRequest) {
       where: { id: payload.userId },
       data: {
         twoFactorSecret: encryptedSecret,
-        // TODO: verify that the user set up 2FA before enabling it
-        twoFactorEnabled: true,
+        twoFactorEnabled: false, // Initially set to false until verified
       },
     });
     return NextResponse.json({ qrCode, otpauth }, { status: 200 });

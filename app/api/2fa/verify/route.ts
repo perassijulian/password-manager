@@ -43,10 +43,8 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
     });
-    if (!user?.twoFactorEnabled)
-      return NextResponse.json({ error: "2FA not setup" }, { status: 400 });
 
-    if (!user.twoFactorSecret)
+    if (!user || !user.twoFactorSecret)
       return NextResponse.json(
         { error: "2FA secret missing" },
         { status: 500 }
@@ -57,6 +55,12 @@ export async function POST(req: NextRequest) {
 
     if (!valid)
       return NextResponse.json({ error: "Invalid code" }, { status: 403 });
+
+    if (!user?.twoFactorEnabled)
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { twoFactorEnabled: true },
+      });
 
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
       expiresIn: "1h",
