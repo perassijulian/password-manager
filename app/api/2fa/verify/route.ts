@@ -36,9 +36,13 @@ export async function POST(req: NextRequest) {
     if (!payload)
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });
 
-    const body = await req.json();
     const schema = z.object({ code: z.string().length(6) });
-    const { code } = schema.parse(body);
+
+    const result = schema.safeParse(await req.json());
+    if (!result.success) {
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    }
+    const { code } = result.data;
 
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
@@ -64,13 +68,6 @@ export async function POST(req: NextRequest) {
 
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
       expiresIn: "1h",
-    });
-
-    const cookie = serialize("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60, // 1 hour
     });
 
     const response = NextResponse.json({ success: true });
