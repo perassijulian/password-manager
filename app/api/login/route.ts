@@ -5,8 +5,7 @@ import argon2 from "argon2";
 import { serialize } from "cookie";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { getClientIp } from "@/utils/getClientIp";
-import { rateLimiter } from "@/lib/rateLimiter";
+import { checkRateLimit } from "@/lib/checkRateLimit";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const loginSchema = z.object({
@@ -16,19 +15,9 @@ const loginSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = getClientIp(req);
-    if (!ip)
-      return NextResponse.json(
-        { error: "IP address not found" },
-        { status: 400 }
-      );
-
-    const { success } = await rateLimiter.limit(ip);
-    if (!success) {
-      return NextResponse.json(
-        { error: "Too many requests, please try again later." },
-        { status: 429 }
-      );
+    const rateLimitCheck = await checkRateLimit(req);
+    if (!rateLimitCheck.ok) {
+      return rateLimitCheck.response;
     }
     const body = await req.json();
     const { email, password } = loginSchema.parse(body);

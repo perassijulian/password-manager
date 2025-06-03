@@ -4,28 +4,17 @@ import { prisma } from "@/lib/prisma";
 import { verifyToken } from "@/utils/verifyToken";
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
-import { getClientIp } from "@/utils/getClientIp";
-import { rateLimiter } from "@/lib/rateLimiter";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
+import { checkRateLimit } from "@/lib/checkRateLimit";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = getClientIp(req);
-    if (!ip)
-      return NextResponse.json(
-        { error: "IP address not found" },
-        { status: 400 }
-      );
-
-    const { success } = await rateLimiter.limit(ip);
-    if (!success) {
-      return NextResponse.json(
-        { error: "Too many requests, please try again later." },
-        { status: 429 }
-      );
+    const rateLimitCheck = await checkRateLimit(req);
+    if (!rateLimitCheck.ok) {
+      return rateLimitCheck.response;
     }
 
     const temp_token = req.cookies.get("temp_token")?.value;

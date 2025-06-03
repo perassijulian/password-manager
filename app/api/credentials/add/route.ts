@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/crypto";
 import { verifyToken } from "@/utils/verifyToken";
+import { checkRateLimit } from "@/lib/checkRateLimit";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -18,6 +19,11 @@ export async function POST(req: NextRequest) {
       { error: "Unauthorized, missing payload" },
       { status: 401 }
     );
+
+  const rateLimitCheck = await checkRateLimit(req);
+  if (!rateLimitCheck.ok) {
+    return rateLimitCheck.response;
+  }
 
   const { service, username, password } = body;
 
