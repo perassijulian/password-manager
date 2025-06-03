@@ -108,7 +108,7 @@ export default function CredentialsList() {
         return;
       }
 
-      const { password } = await res.json();
+      const { password } = data;
 
       if (!navigator.clipboard) {
         setToast({ message: "Clipboard not supported", type: "error" });
