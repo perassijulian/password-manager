@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, Copy, Trash2, Check } from "lucide-react";
-import { set } from "zod/v4";
+import Toast from "./Toast";
 
 type Credential = {
   id: string;
@@ -17,6 +17,10 @@ export default function CredentialsList() {
   const [error, setError] = useState("");
   const [revealed, setRevealed] = useState<{ [key: string]: boolean }>({});
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "error" | "success" | "info";
+  } | null>(null);
 
   useEffect(() => {
     async function fetchCredentials() {
@@ -62,15 +66,37 @@ export default function CredentialsList() {
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Something went wrong");
+        setToast({
+          message: "Failed to copy password",
+          type: "error",
+        });
+        console.error("Failed to copy password:", data.error);
+        return;
       }
 
       const { password } = await res.json();
-      await navigator.clipboard.writeText(password);
-      setCopied((prev) => ({ ...prev, [id]: true }));
-      setTimeout(() => setCopied((prev) => ({ ...prev, [id]: false })), 1000);
+
+      if (!navigator.clipboard) {
+        setToast({ message: "Clipboard not supported", type: "error" });
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(password);
+        setCopied((prev) => ({ ...prev, [id]: true }));
+        setTimeout(() => setCopied((prev) => ({ ...prev, [id]: false })), 1000);
+        setToast({
+          message: "Password copied to clipboard!",
+          type: "success",
+        });
+      } catch (error) {
+        console.error("Failed to write to clipboard:", error);
+        setToast({ message: "Failed to copy password", type: "error" });
+        return;
+      }
     } catch (error) {
       console.error("Failed to copy password:", error);
+      setToast({ message: "Failed to copy password", type: "error" });
       return;
     }
   };
@@ -85,6 +111,13 @@ export default function CredentialsList() {
 
   return (
     <div className="max-w-3xl mx-auto mt-2 space-y-4">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <h2 className="text-xl font-semibold mb-4">Your Credentials</h2>
       {credentials.map((cred) => (
         <div
