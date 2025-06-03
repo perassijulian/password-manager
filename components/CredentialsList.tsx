@@ -55,6 +55,39 @@ export default function CredentialsList() {
     });
   }
 
+  // Delete credential
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this credential?")) return;
+    try {
+      const res = await fetch(`/api/credentials/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setToast({
+          message: "Failed to delete credential",
+          type: "error",
+        });
+        console.error("Failed to delete credential:", data.error);
+        return;
+      }
+
+      setCredentials((prev) => prev.filter((cred) => cred.id !== id));
+      setToast({
+        message: "Credential deleted successfully",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to delete credential:", error);
+      setToast({ message: "Failed to delete credential", type: "error" });
+      return;
+    }
+  };
+
   // Copy password to clipboard
   const handleCopy = async (id: string) => {
     try {
@@ -65,8 +98,8 @@ export default function CredentialsList() {
           "Content-Type": "application/json",
         },
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         setToast({
           message: "Failed to copy password",
           type: "error",
@@ -126,6 +159,7 @@ export default function CredentialsList() {
           cred={cred}
           handleCopy={handleCopy}
           toggleReveal={toggleReveal}
+          handleDelete={handleDelete}
           revealed={revealed}
           copied={copied}
         />

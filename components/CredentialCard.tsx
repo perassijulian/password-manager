@@ -11,6 +11,7 @@ interface CredentialCardProps {
   cred: Credential;
   handleCopy: (id: string) => void;
   toggleReveal: (id: string) => void;
+  handleDelete: (id: string) => void;
   revealed: { [key: string]: boolean };
   copied: { [key: string]: boolean };
 }
@@ -19,6 +20,7 @@ export default function CredentialCard({
   cred,
   handleCopy,
   toggleReveal,
+  handleDelete,
   revealed,
   copied,
 }: CredentialCardProps) {
@@ -30,7 +32,13 @@ export default function CredentialCard({
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
           <p className="text-lg font-medium text-gray-900">{cred.service}</p>
-          <Trash2 className="text-red-500 hover:text-red-700" size={20} />
+          <button
+            onClick={() => handleDelete(cred.id)}
+            className="text-red-500 hover:text-red-700"
+            aria-label={`Delete ${cred.service}`}
+          >
+            <Trash2 size={20} />
+          </button>
         </div>
         <p className="text-sm text-gray-500">{cred.username}</p>
         <div className="flex items-center justify-between">
