@@ -8,11 +8,13 @@ import { Credential } from "@/types";
 interface CredentialProps {
   credentials: Credential[];
   setCredentials: (credentials: Credential[]) => void;
+  setIsModalOpen: (isOpen: boolean) => void;
 }
 
 export default function CredentialsList({
   credentials,
   setCredentials,
+  setIsModalOpen,
 }: CredentialProps) {
   const [revealed, setRevealed] = useState<{ [key: string]: boolean }>({});
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
@@ -72,6 +74,7 @@ export default function CredentialsList({
   const handleCopy = async (id: string) => {
     try {
       // TODO Reauthenticate user before copying
+      setIsModalOpen(true);
       const res = await fetch(`/api/credentials/${id}/copy`, {
         method: "POST",
         headers: {

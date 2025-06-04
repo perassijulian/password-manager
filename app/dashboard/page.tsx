@@ -6,6 +6,7 @@ import CredentialDrawer from "@/components/CredentialDrawer";
 import CredentialsList from "@/components/CredentialsList";
 import { DoorOpen, Moon, Sun } from "lucide-react";
 import Toast from "@/components/Toast";
+import Modal from "@/components/Modal";
 
 type Credential = {
   id: string;
@@ -24,6 +25,7 @@ export default function Dashboard() {
     message: string;
     type: "error" | "success" | "info";
   } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchCredentials() {
@@ -92,6 +94,11 @@ export default function Dashboard() {
 
   return (
     <div className="relative min-h-screen bg-gray-50 p-4 pb-28 w-full">
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        children={<div>REAUTHENTICATE</div>}
+      />
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Dashboard</h1>
         {toast && (
@@ -121,6 +128,7 @@ export default function Dashboard() {
       <CredentialsList
         credentials={credentials}
         setCredentials={setCredentials}
+        setIsModalOpen={setIsModalOpen}
       />
       <CredentialDrawer setCredentials={setCredentials} />
     </div>
