@@ -4,8 +4,15 @@ import { useState } from "react";
 import CredentialForm from "./CredentialForm";
 import CredentialToggleButton from "./CredentialToggleButton";
 import Toast from "./Toast";
+import { Credential } from "@/types";
 
-export default function CredentialDrawer() {
+interface CredentialDrawerProps {
+  setCredentials: React.Dispatch<React.SetStateAction<Credential[]>>;
+}
+
+export default function CredentialDrawer({
+  setCredentials,
+}: CredentialDrawerProps) {
   const [showForm, setShowForm] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
@@ -44,6 +51,7 @@ export default function CredentialDrawer() {
         <CredentialForm
           setToast={setToast}
           onClick={() => setShowForm((prev) => !prev)}
+          setCredentials={setCredentials}
         />
       </div>
     </div>

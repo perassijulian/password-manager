@@ -1,45 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Eye, EyeOff, Copy, Trash2, Check } from "lucide-react";
+import { useState } from "react";
 import Toast from "./Toast";
 import CredentialCard from "./CredentialCard";
+import { Credential } from "@/types";
 
-type Credential = {
-  id: string;
-  service: string;
-  username: string;
-  password: string;
-};
+interface CredentialProps {
+  credentials: Credential[];
+  setCredentials: (credentials: Credential[]) => void;
+}
 
-export default function CredentialsList() {
-  const [credentials, setCredentials] = useState<Credential[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+export default function CredentialsList({
+  credentials,
+  setCredentials,
+}: CredentialProps) {
   const [revealed, setRevealed] = useState<{ [key: string]: boolean }>({});
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
   const [toast, setToast] = useState<{
     message: string;
     type: "error" | "success" | "info";
   } | null>(null);
-
-  useEffect(() => {
-    async function fetchCredentials() {
-      try {
-        const res = await fetch("/api/credentials");
-        const data = await res.json();
-        if (!res.ok)
-          throw new Error(data.error || "Failed to load credentials");
-        setCredentials(data.credentials);
-      } catch (err: any) {
-        setError(err.message || "Unexpected error");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchCredentials();
-  }, []);
 
   function toggleReveal(id: string) {
     setRevealed((prev) => {
@@ -76,7 +56,7 @@ export default function CredentialsList() {
         return;
       }
 
-      setCredentials((prev) => prev.filter((cred) => cred.id !== id));
+      setCredentials(credentials.filter((cred: Credential) => cred.id !== id));
       setToast({
         message: "Credential deleted successfully",
         type: "success",
@@ -135,9 +115,6 @@ export default function CredentialsList() {
     }
   };
 
-  if (loading)
-    return <p className="text-center mt-6 text-gray-600">Loading...</p>;
-  if (error) return <p className="text-center mt-6 text-red-500">{error}</p>;
   if (credentials.length === 0)
     return (
       <p className="text-center mt-6 text-gray-500">No credentials saved.</p>

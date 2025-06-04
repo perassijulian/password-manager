@@ -1,17 +1,20 @@
 import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import Button from "./Button";
+import { Credential } from "@/types";
 
 interface CredentialFormProps {
   onClick: () => void;
   setToast: (
     toast: { message: string; type: "error" | "success" | "info" } | null
   ) => void;
+  setCredentials: React.Dispatch<React.SetStateAction<Credential[]>>;
 }
 
 export default function CredentialForm({
   onClick,
   setToast,
+  setCredentials,
 }: CredentialFormProps) {
   const [form, setForm] = useState({ service: "", username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -31,6 +34,15 @@ export default function CredentialForm({
       const data = await res.json();
       if (res.ok) {
         setToast({ message: "Credential saved successfully", type: "success" });
+        setCredentials((prev) => [
+          ...prev,
+          {
+            id: data.id,
+            service: form.service,
+            username: form.username,
+            password: form.password,
+          },
+        ]);
         setTimeout(() => {
           setForm({ service: "", username: "", password: "" });
           onClick();

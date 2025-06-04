@@ -7,15 +7,45 @@ import CredentialsList from "@/components/CredentialsList";
 import { DoorOpen, Moon, Sun } from "lucide-react";
 import Toast from "@/components/Toast";
 
+type Credential = {
+  id: string;
+  service: string;
+  username: string;
+  password: string;
+};
+
 export default function Dashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
+  const [credentials, setCredentials] = useState<Credential[]>([]);
   const [toast, setToast] = useState<{
     message: string;
     type: "error" | "success" | "info";
   } | null>(null);
+
+  useEffect(() => {
+    async function fetchCredentials() {
+      try {
+        const res = await fetch("/api/credentials");
+        const data = await res.json();
+        if (!res.ok)
+          throw new Error(data.error || "Failed to load credentials");
+        setCredentials(data.credentials);
+      } catch (err: any) {
+        setToast({
+          message: err.message || "Failed to load credentials",
+          type: "error",
+        });
+        console.error("Error fetching credentials:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCredentials();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -88,8 +118,11 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
-      <CredentialsList />
-      <CredentialDrawer />
+      <CredentialsList
+        credentials={credentials}
+        setCredentials={setCredentials}
+      />
+      <CredentialDrawer setCredentials={setCredentials} />
     </div>
   );
 }
