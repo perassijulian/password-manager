@@ -24,13 +24,18 @@ export default function CredentialForm({
     e.preventDefault();
     setIsLoading(true);
 
+    const { service, username, password } = form;
+
     try {
       const res = await fetch("/api/credentials/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ service, username, password }),
       });
-
+      setForm({ service: "", username: "", password: "" }); // clear ASAP
+      // May be better to clear after response
+      // to avoid showing stale data in case of error.
+      // But this gives better security
       const data = await res.json();
       if (res.ok) {
         setToast({ message: "Credential saved successfully", type: "success" });
@@ -38,13 +43,14 @@ export default function CredentialForm({
           ...prev,
           {
             id: data.id,
-            service: form.service,
-            username: form.username,
-            password: form.password,
+            service,
+            username,
+            password:
+              // Store obfuscated password for display only – avoid keeping plaintext in memory
+              form.password.slice(0, 2) + "*****" + form.password.slice(-2),
           },
         ]);
         setTimeout(() => {
-          setForm({ service: "", username: "", password: "" });
           onClick();
         }, 500);
       } else {
