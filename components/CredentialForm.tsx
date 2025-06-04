@@ -2,7 +2,6 @@ import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import Button from "./Button";
 import { Credential } from "@/types";
-import { v4 as uuidv4 } from "uuid";
 
 interface CredentialFormProps {
   onClick: () => void;
@@ -43,7 +42,7 @@ export default function CredentialForm({
         setCredentials((prev) => [
           ...prev,
           {
-            id: data.id || uuidv4(), // prefer backend ID but fallback if needed
+            id: data.credential.id,
             service,
             username,
             password:
@@ -56,9 +55,10 @@ export default function CredentialForm({
         }, 500);
       } else {
         setToast({
-          message: data.error || "Error saving credential",
+          message: "Error saving credential",
           type: "error",
         });
+        console.error("Error saving credential:", data.error);
       }
     } catch (err) {
       setToast({
