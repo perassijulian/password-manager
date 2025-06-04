@@ -2,6 +2,7 @@ import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import Button from "./Button";
 import { Credential } from "@/types";
+import { v4 as uuidv4 } from "uuid";
 
 interface CredentialFormProps {
   onClick: () => void;
@@ -42,7 +43,7 @@ export default function CredentialForm({
         setCredentials((prev) => [
           ...prev,
           {
-            id: data.id,
+            id: data.id || uuidv4(), // prefer backend ID but fallback if needed
             service,
             username,
             password:
