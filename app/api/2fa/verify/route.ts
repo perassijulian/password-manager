@@ -55,6 +55,16 @@ export async function POST(req: NextRequest) {
         data: { twoFactorEnabled: true },
       });
 
+    await prisma.twoFAChallenge.updateMany({
+      where: {
+        userId: user.id,
+        isVerified: false,
+        expiresAt: { gt: new Date() },
+        method: "TOTP",
+      },
+      data: { isVerified: true, method: "TOTP" },
+    });
+
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
       expiresIn: "1h",
     });

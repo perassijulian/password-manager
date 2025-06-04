@@ -9,13 +9,14 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(cuid())
-  email       String       @unique
-  password    String
-  credentials Credential[]
-  twoFactorSecret   String?
-  twoFactorEnabled  Boolean  @default(false)
-  createdAt   DateTime     @default(now())
+  id               String           @id @default(cuid())
+  email            String           @unique
+  password         String
+  credentials      Credential[]
+  twoFactorSecret  String?
+  twoFactorEnabled Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+  TwoFAChallenge   TwoFAChallenge[]
 }
 
 model Credential {
@@ -27,4 +28,21 @@ model Credential {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model TwoFAChallenge {
+  id         String   @id @default(cuid())
+  userId     String
+  code       String // TOTP, numeric code, or random token
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+  ipAddress  String? // Optional: log for audit
+  userAgent  String? // Optional: better audit trail
+  method     String // e.g., "TOTP", "email", "webauthn"
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
 }

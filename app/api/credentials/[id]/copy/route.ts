@@ -14,6 +14,11 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const rateLimitCheck = await checkRateLimit(req);
+    if (!rateLimitCheck.ok) {
+      return rateLimitCheck.response;
+    }
+
     const { id } = await context.params;
 
     const parseResult = ParamsSchema.safeParse({ id });
@@ -32,11 +37,6 @@ export async function POST(
     const payload = await verifyToken(token);
     if (!payload)
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });
-
-    const rateLimitCheck = await checkRateLimit(req);
-    if (!rateLimitCheck.ok) {
-      return rateLimitCheck.response;
-    }
 
     const credential = await prisma.credential.findUnique({
       where: { id: parsedId, userId: payload.userId },
