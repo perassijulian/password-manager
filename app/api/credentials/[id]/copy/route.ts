@@ -47,9 +47,14 @@ export async function POST(
       "sensitive",
       deviceId
     );
-    if (result !== true)
-      return NextResponse.json({ error: "2FA required" }, { status: 401 });
 
+    if (result !== true) {
+      console.error(
+        "AUTH FAILED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+        result
+      );
+      return NextResponse.json({ error: "2FA required" }, { status: 401 });
+    }
     const credential = await prisma.credential.findUnique({
       where: { id: parsedId, userId: payload.userId },
     });

@@ -124,24 +124,26 @@ export async function POST(req: NextRequest) {
         actionType
       );
       if (isAlreadyAuthorized) {
-        console.log("Sensitive action already authorized:", {
-          userId: user.id,
-          context,
-          deviceId,
-          actionType,
+        const updated = await prisma.twoFAChallenge.updateMany({
+          where: {
+            userId: user.id,
+            context,
+            deviceId,
+            actionType,
+            method: "TOTP",
+            isVerified: true,
+            ipAddress: req.headers.get("x-forwarded-for") || "Unknown",
+            userAgent: req.headers.get("user-agent") || "Unknown",
+          },
+          data: {
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+            verifiedAt: new Date(),
+          },
         });
         return NextResponse.json({ success: true });
       }
-
       const secret = decrypt(user.twoFactorSecret);
       const valid = verify2FA(secret, code);
-      console.log("2FA verification result:", {
-        userId: user.id,
-        context,
-        deviceId,
-        actionType,
-        valid,
-      });
 
       if (!valid)
         return NextResponse.json({ error: "Invalid code" }, { status: 403 });
@@ -159,13 +161,6 @@ export async function POST(req: NextRequest) {
           ipAddress: req.headers.get("x-forwarded-for") || "Unknown",
           userAgent: req.headers.get("user-agent") || "Unknown",
         },
-      });
-
-      console.log("2FA challenge verified for sensitive action:", {
-        userId: user.id,
-        context,
-        deviceId,
-        actionType,
       });
 
       return NextResponse.json({ success: true });

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import Toast from "@/components/Toast";
 import Button from "@/components/Button";
 import { set } from "zod/v4";
+import { useDeviceId } from "@/lib/hooks/useDeviceId";
 
 const formSchema = z.object({
   code: z
@@ -27,6 +28,7 @@ export default function Setup() {
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const deviceId = useDeviceId();
 
   const {
     register,
@@ -46,7 +48,6 @@ export default function Setup() {
         setQrCode(data.qrCode);
         setSetupUrl(data.otpauth);
       } catch (err) {
-        console.log("Error fetching QR code:", err); // DELETE THIS LINE IN PRODUCTION
         console.error(err);
         setToast({
           message: "Unable to load QR code. Please try again.",
@@ -66,7 +67,12 @@ export default function Setup() {
       const res = await fetch("/api/2fa/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: data.code }),
+        body: JSON.stringify({
+          code: data.code,
+          deviceId,
+          actionType: "login",
+          context: "login",
+        }),
       });
 
       const result = await res.json();

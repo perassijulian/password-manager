@@ -21,11 +21,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { email, password } = schema.parse(body);
     const hashedPassword = await argon2.hash(password);
-    console.log("Creating user with email:", hashedPassword);
     const user = await prisma.user.create({
       data: { email, password: hashedPassword },
     });
-    console.log("User created with ID:", user.id);
 
     return NextResponse.json(
       { message: "User created", userId: user.id },

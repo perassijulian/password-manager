@@ -83,33 +83,19 @@ export default function CredentialsList({
         });
         return;
       }
-      const checkRes = await fetch("/api/2fa/check-action", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          actionType: "copy_password",
-          context: "sensitive",
-          deviceId,
-        }),
-      });
-
-      const checkData = await checkRes.json();
-
-      console.log("2FA check response:", checkData);
-
-      if (!checkRes.ok || !checkData.allowed) {
-        setIsModalOpen(true); // open modal to perform 2FA
-        return;
-      }
       const res = await fetch(`/api/credentials/${id}/copy`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-device-id": deviceId,
         },
       });
       const data = await res.json();
+
+      if (res.status === 401 && data.error === "2FA required") {
+        setIsModalOpen(true); // open modal to perform 2FA
+        return;
+      }
       if (!res.ok) {
         setToast({
           message: "Failed to copy password",
