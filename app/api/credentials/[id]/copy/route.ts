@@ -39,11 +39,16 @@ export async function POST(
     if (!payload)
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });
 
+    const deviceId = req.headers.get("x-device-id") ?? "";
+
     const result = await authorizeSensitiveAction(
       payload.userId,
-      "copy_password"
+      "copy_password",
+      "sensitive",
+      deviceId
     );
-    if (result !== true) return result;
+    if (result !== true)
+      return NextResponse.json({ error: "2FA required" }, { status: 401 });
 
     const credential = await prisma.credential.findUnique({
       where: { id: parsedId, userId: payload.userId },
