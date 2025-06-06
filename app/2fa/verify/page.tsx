@@ -45,9 +45,11 @@ export default function Verify2FA() {
         router.push("/dashboard");
       } else {
         setToast({
-          message: result.error || "Verification failed",
+          message: "Verification failed",
           type: "error",
         });
+        console.error("2FA verification error:", result.error);
+        return;
       }
     } catch (err) {
       console.error("2FA verify error:", err);
