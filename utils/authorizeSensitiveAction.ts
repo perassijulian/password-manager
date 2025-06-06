@@ -7,22 +7,6 @@ export async function authorizeSensitiveAction(
   context: string,
   deviceId: string
 ): Promise<true | NextResponse> {
-  const allTwoFAChallegenges = await prisma.twoFAChallenge.findMany({
-    where: {
-      userId,
-    },
-  });
-  //console.log("All 2FA challenges for user:", allTwoFAChallegenges);
-  const challenge = await prisma.twoFAChallenge.findFirst({
-    where: {
-      userId,
-      actionType,
-      context,
-      deviceId,
-    },
-  });
-  //console.log("Challenge found:", challenge);
-  /**
   const challenge = await prisma.twoFAChallenge.findFirst({
     where: {
       userId,
@@ -34,8 +18,6 @@ export async function authorizeSensitiveAction(
     },
     orderBy: { verifiedAt: "desc" },
   });
-   */
-  console.log("Challenge found:", challenge);
 
   const maxAgeMs = 5 * 60 * 1000; // 5 minutes
   if (
