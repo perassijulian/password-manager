@@ -33,7 +33,7 @@ export default function Modal({
     >
       <div
         className={clsx(
-          "relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm animate-fadeIn",
+          "relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm animate-fadeIn space-y-4",
           className
         )}
       >

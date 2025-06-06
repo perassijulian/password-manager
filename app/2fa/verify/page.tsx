@@ -68,15 +68,17 @@ export default function Verify2FA() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <TwoFAVerification
-        handleSubmit={handleSubmit}
-        onSubmit={onSubmit}
-        register={register}
-        errors={errors}
-        toast={toast}
-        setToast={setToast}
-        isLoading={isLoading}
-      />
+      <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4">
+        <TwoFAVerification
+          handleSubmit={handleSubmit}
+          onSubmit={onSubmit}
+          register={register}
+          errors={errors}
+          toast={toast}
+          setToast={setToast}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   );
 }

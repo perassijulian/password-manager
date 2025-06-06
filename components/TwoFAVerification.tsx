@@ -34,7 +34,7 @@ export default function TwoFAVerification({
   isLoading,
 }: TwoFAVerificationProps) {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4">
+    <>
       <h1 className="text-2xl font-semibold mb-2 text-center">
         2FA Verification
       </h1>
@@ -67,6 +67,6 @@ export default function TwoFAVerification({
           {isLoading ? "Verifying..." : "Verify"}
         </Button>
       </form>
-    </div>
+    </>
   );
 }
