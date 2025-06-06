@@ -30,19 +30,47 @@ model Credential {
   user User @relation(fields: [userId], references: [id])
 }
 
-model TwoFAChallenge {
-  id         String   @id @default(cuid())
-  userId     String
-  code       String // TOTP, numeric code, or random token
-  isVerified Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  expiresAt  DateTime
-  ipAddress  String? // Optional: log for audit
-  userAgent  String? // Optional: better audit trail
-  method     String // e.g., "TOTP", "email", "webauthn"
+/// The TwoFAChallenge model represents a 2FA verification attempt by a user.
+/// It supports multiple methods (e.g., TOTP, email, WebAuthn) and tracks the context 
+/// (e.g., login, sensitive action) to support flexible, policy-based access control.
+///
+/// Fields:
+/// - `method`: The type of 2FA used (e.g., "TOTP", "webauthn").
+/// - `context`: General use case ("login", "sensitive").
+/// - `actionType`: Optional fine-grained action (e.g., "copy_password").
+/// - `verifiedAt`: Timestamp when the challenge was successfully verified.
+/// - `expiresAt`: Used to enforce time-bound challenges.
+/// - `ipAddress`, `userAgent`, `deviceId`, `location`: Used for auditing and session consistency checks.
+///
+/// Best Practices:
+/// - Use `context` and `actionType` to determine re-verification requirements.
+/// - Store IP/UserAgent to detect suspicious activity (e.g., session hijacking).
+/// - Support device trust and location heuristics using optional fields.
+///
+/// This model helps implement a secure and user-friendly 2FA flow by decoupling 
+/// challenge tracking from session logic, enabling audit logging and future expansion.
 
-  user User @relation(fields: [userId], references: [id])
+model TwoFAChallenge {
+  id              String   @id @default(cuid())
+  userId          String
+  code            String?  // TOTP code or token, null if WebAuthn is used
+  method          String   // "TOTP", "email", "webauthn", etc.
+  context         String   // "login", "sensitive", etc.
+  actionType      String?  // e.g., "copy_password", "view_recovery_codes"
+
+  isVerified      Boolean  @default(false)
+  verifiedAt      DateTime?
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime
+
+  ipAddress       String?  // For IP consistency check / audit
+  userAgent       String?  // For session fingerprinting / security logs
+  location        String?  // Optional: GeoIP info for alerting / logs
+  deviceId        String?  // Optional: cookie-based fingerprint, if supported
+
+  user            User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([createdAt])
+  @@index([context])
 }

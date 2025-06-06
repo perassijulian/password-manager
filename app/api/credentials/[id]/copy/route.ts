@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { decrypt } from "@/lib/crypto";
 import { checkRateLimit } from "@/lib/checkRateLimit";
 import { z } from "zod";
+import { authorizeSensitiveAction } from "@/utils/authorizeSensitiveAction";
 
 const ParamsSchema = z.object({
   id: z.string().cuid(),
@@ -37,6 +38,12 @@ export async function POST(
     const payload = await verifyToken(token);
     if (!payload)
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+
+    const result = await authorizeSensitiveAction(
+      payload.userId,
+      "copy_password"
+    );
+    if (result !== true) return result;
 
     const credential = await prisma.credential.findUnique({
       where: { id: parsedId, userId: payload.userId },
