@@ -7,8 +7,16 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
 import { checkRateLimit } from "@/lib/checkRateLimit";
+import { authorizeSensitiveAction } from "@/utils/authorizeSensitiveAction";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
+
+const schema = z.object({
+  code: z.string().length(6),
+  deviceId: z.string(),
+  context: z.enum(["login", "sensitive"]),
+  actionType: z.string(),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,77 +25,151 @@ export async function POST(req: NextRequest) {
       return rateLimitCheck.response;
     }
 
-    const temp_token = req.cookies.get("temp_token")?.value;
-    if (!temp_token)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const result = schema.parse(await req.json());
+    const { code, deviceId, context, actionType } = result;
 
-    const payload = await verifyToken(temp_token);
-    if (!payload)
-      return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+    if (context === "login") {
+      const temp_token = req.cookies.get("temp_token")?.value;
+      if (!temp_token)
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const schema = z.object({ code: z.string().length(6) });
-    const result = schema.safeParse(await req.json());
-
-    if (!result.success) {
-      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
-    }
-    const { code } = result.data;
-
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-    });
-
-    if (!user || !user.twoFactorSecret)
-      return NextResponse.json(
-        { error: "2FA secret missing" },
-        { status: 500 }
-      );
-
-    const secret = decrypt(user.twoFactorSecret);
-    const valid = verify2FA(secret, code);
-
-    if (!valid)
-      return NextResponse.json({ error: "Invalid code" }, { status: 403 });
-
-    if (!user?.twoFactorEnabled)
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { twoFactorEnabled: true },
+      const payload = await verifyToken(temp_token);
+      if (!payload)
+        return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+      const user = await prisma.user.findUnique({
+        where: { id: payload.userId },
       });
 
-    await prisma.twoFAChallenge.updateMany({
-      where: {
+      if (!user || !user.twoFactorSecret)
+        return NextResponse.json(
+          { error: "2FA secret missing" },
+          { status: 500 }
+        );
+
+      const secret = decrypt(user.twoFactorSecret);
+      const valid = verify2FA(secret, code);
+
+      if (!valid)
+        return NextResponse.json({ error: "Invalid code" }, { status: 403 });
+
+      if (!user?.twoFactorEnabled)
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { twoFactorEnabled: true },
+        });
+
+      await prisma.twoFAChallenge.create({
+        data: {
+          userId: user.id,
+          context,
+          deviceId,
+          actionType,
+          method: "TOTP",
+          isVerified: true,
+          expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+          verifiedAt: new Date(),
+          ipAddress: req.headers.get("x-forwarded-for") || "Unknown",
+          userAgent: req.headers.get("user-agent") || "Unknown",
+        },
+      });
+
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
+        expiresIn: "1h",
+      });
+
+      const response = NextResponse.json({ success: true });
+      response.headers.set(
+        "Set-Cookie",
+        [
+          serialize("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            path: "/",
+            maxAge: 60 * 60, // 1 hour
+          }),
+          serialize("temp_token", "", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            path: "/",
+            maxAge: 0,
+          }),
+        ].join(", ")
+      );
+      return response;
+    }
+
+    if (context === "sensitive") {
+      const token = req.cookies.get("token")?.value;
+      if (!token)
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+      const payload = await verifyToken(token);
+      if (!payload)
+        return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+
+      const user = await prisma.user.findUnique({
+        where: { id: payload.userId },
+      });
+
+      if (!user || !user.twoFactorSecret)
+        return NextResponse.json(
+          { error: "2FA secret missing" },
+          { status: 500 }
+        );
+
+      const isAlreadyAuthorized = await authorizeSensitiveAction(
+        user.id,
+        context,
+        deviceId,
+        actionType
+      );
+      if (isAlreadyAuthorized) {
+        console.log("Sensitive action already authorized:", {
+          userId: user.id,
+          context,
+          deviceId,
+          actionType,
+        });
+        return NextResponse.json({ success: true });
+      }
+
+      const secret = decrypt(user.twoFactorSecret);
+      const valid = verify2FA(secret, code);
+      console.log("2FA verification result:", {
         userId: user.id,
-        isVerified: false,
-        expiresAt: { gt: new Date() },
-        method: "TOTP",
-      },
-      data: { isVerified: true, method: "TOTP" },
-    });
+        context,
+        deviceId,
+        actionType,
+        valid,
+      });
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
-      expiresIn: "1h",
-    });
+      if (!valid)
+        return NextResponse.json({ error: "Invalid code" }, { status: 403 });
 
-    const response = NextResponse.json({ success: true });
-    response.headers.set(
-      "Set-Cookie",
-      [
-        serialize("token", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          path: "/",
-          maxAge: 60 * 60, // 1 hour
-        }),
-        serialize("temp_token", "", {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          path: "/",
-          maxAge: 0,
-        }),
-      ].join(", ")
-    );
-    return response;
+      await prisma.twoFAChallenge.create({
+        data: {
+          userId: user.id,
+          context,
+          deviceId,
+          actionType,
+          method: "TOTP",
+          isVerified: true,
+          expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+          verifiedAt: new Date(),
+          ipAddress: req.headers.get("x-forwarded-for") || "Unknown",
+          userAgent: req.headers.get("user-agent") || "Unknown",
+        },
+      });
+
+      console.log("2FA challenge verified for sensitive action:", {
+        userId: user.id,
+        context,
+        deviceId,
+        actionType,
+      });
+
+      return NextResponse.json({ success: true });
+    }
   } catch (error) {
     console.error("Error in 2FA verification:", error);
     return NextResponse.json(

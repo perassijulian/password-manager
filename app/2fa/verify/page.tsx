@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import TwoFAVerification from "@/components/TwoFAVerification";
+import { useDeviceId } from "@/lib/hooks/useDeviceId";
 
 const formSchema = z.object({
   code: z
@@ -22,6 +23,7 @@ export default function Verify2FA() {
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const deviceId = useDeviceId();
 
   const {
     register,
@@ -36,7 +38,12 @@ export default function Verify2FA() {
       const res = await fetch("/api/2fa/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: data.code }),
+        body: JSON.stringify({
+          code: data.code,
+          deviceId,
+          actionType: "login",
+          context: "login",
+        }),
       });
 
       const result = await res.json();

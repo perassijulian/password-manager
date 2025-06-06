@@ -3,18 +3,28 @@ import { NextResponse } from "next/server";
 
 export async function authorizeSensitiveAction(
   userId: string,
-  actionType: string
+  actionType: string,
+  context: string,
+  deviceId: string
 ): Promise<true | NextResponse> {
+  console.log("Authorizing sensitive action:", {
+    userId,
+    actionType,
+    context,
+    deviceId,
+  });
   const challenge = await prisma.twoFAChallenge.findFirst({
     where: {
       userId,
-      method: "sensitive",
       actionType,
+      context,
+      deviceId,
       verifiedAt: { not: null },
       expiresAt: { gt: new Date() },
     },
     orderBy: { verifiedAt: "desc" },
   });
+  console.log("Challenge found:", challenge);
 
   const maxAgeMs = 5 * 60 * 1000; // 5 minutes
   if (

@@ -11,6 +11,7 @@ import TwoFAVerification from "@/components/TwoFAVerification";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDeviceId } from "@/lib/hooks/useDeviceId";
 
 type Credential = {
   id: string;
@@ -44,6 +45,7 @@ export default function Dashboard() {
     formState: { errors },
     reset,
   } = useForm<FormData>({ resolver: zodResolver(formSchema) });
+  const deviceId = useDeviceId();
 
   useEffect(() => {
     async function fetchCredentials() {
@@ -115,7 +117,12 @@ export default function Dashboard() {
       const res = await fetch("/api/2fa/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: data.code }),
+        body: JSON.stringify({
+          code: data.code,
+          deviceId,
+          actionType: "copy_password",
+          context: "sensitive",
+        }),
       });
 
       const result = await res.json();
