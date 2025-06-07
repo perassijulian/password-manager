@@ -5,6 +5,7 @@ import Toast from "./Toast";
 import CredentialCard from "./CredentialCard";
 import { Credential } from "@/types";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
+import safeClipboardWrite from "@/utils/safeClipboardWrite";
 
 interface CredentialProps {
   credentials: Credential[];
@@ -107,24 +108,23 @@ export default function CredentialsList({
 
       const { password } = data;
 
-      if (!navigator.clipboard) {
+      const result = await safeClipboardWrite(password);
+      if (result === "unsupported") {
         setToast({ message: "Clipboard not supported", type: "error" });
         return;
       }
-
-      try {
-        await navigator.clipboard.writeText(password);
-        setCopied((prev) => ({ ...prev, [id]: true }));
-        setTimeout(() => setCopied((prev) => ({ ...prev, [id]: false })), 1000);
-        setToast({
-          message: "Password copied to clipboard!",
-          type: "success",
-        });
-      } catch (error) {
-        console.error("Failed to write to clipboard:", error);
+      if (result === "error") {
         setToast({ message: "Failed to copy password", type: "error" });
         return;
       }
+      // If we reach here, the password was successfully copied
+      // Update copied state to show success
+      setCopied((prev) => ({ ...prev, [id]: true }));
+      setTimeout(() => setCopied((prev) => ({ ...prev, [id]: false })), 1000);
+      setToast({
+        message: "Password copied to clipboard!",
+        type: "success",
+      });
     } catch (error) {
       console.error("Failed to copy password:", error);
       setToast({ message: "Failed to copy password", type: "error" });
