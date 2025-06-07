@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
+import safeClipboardWrite from "@/utils/safeClipboardWrite";
 
 type Credential = {
   id: string;
@@ -45,6 +46,11 @@ export default function Dashboard() {
     formState: { errors },
     reset,
   } = useForm<FormData>({ resolver: zodResolver(formSchema) });
+  const [pendingAction, setPendingAction] = useState<null | {
+    type: "copy_password";
+    credentialId: string;
+  }>(null);
+  const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
   const deviceId = useDeviceId();
 
   useEffect(() => {
@@ -107,6 +113,67 @@ export default function Dashboard() {
         message: "An unexpected error occurred. Please try again later.",
         type: "error",
       });
+    }
+  };
+
+  const handleCopy = async (id: string) => {
+    try {
+      if (!deviceId) {
+        setToast({
+          message: "Device not ready yet. Try again in a second.",
+          type: "error",
+        });
+        return;
+      }
+      const res = await fetch(`/api/credentials/${id}/copy`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-device-id": deviceId,
+        },
+      });
+      const data = await res.json();
+
+      if (res.status === 401 && data.error === "2FA required") {
+        setPendingAction({
+          type: "copy_password",
+          credentialId: id,
+        });
+        setIsModalOpen(true); // open modal to perform 2FA
+        return;
+      }
+      if (!res.ok) {
+        setToast({
+          message: "Failed to copy password",
+          type: "error",
+        });
+        console.error("Failed to copy password:", data.error);
+        return;
+      }
+
+      const { password } = data;
+
+      const result = await safeClipboardWrite(password);
+      if (result === "unsupported") {
+        setToast({ message: "Clipboard not supported", type: "error" });
+        return;
+      }
+      if (result === "error") {
+        setToast({ message: "Failed to copy password", type: "error" });
+        return;
+      }
+      // If we reach here, the password was successfully copied
+      // Update copied state to show success
+      setCopied((prev) => ({ ...prev, [id]: true }));
+      setTimeout(() => setCopied((prev) => ({ ...prev, [id]: false })), 1000);
+      setToast({
+        message: "Password copied to clipboard!",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to copy password:", error);
+      setToast({ message: "Failed to copy password", type: "error" });
+      return;
     }
   };
 
@@ -191,7 +258,8 @@ export default function Dashboard() {
       <CredentialsList
         credentials={credentials}
         setCredentials={setCredentials}
-        setIsModalOpen={setIsModalOpen}
+        handleCopy={handleCopy}
+        copied={copied}
       />
       <CredentialDrawer setCredentials={setCredentials} />
     </div>
