@@ -204,6 +204,7 @@ export default function Dashboard() {
       }
 
       setToast({ message: "2FA verified successfully!", type: "success" });
+      handle2FASuccess();
       setIsModalOpen(false);
       reset();
     } catch (error: any) {
@@ -211,6 +212,63 @@ export default function Dashboard() {
       console.error("2FA verification error:", error);
     } finally {
       setIsVerifying(false);
+    }
+  };
+
+  const handle2FASuccess = async () => {
+    try {
+      if (!pendingAction || !deviceId) return;
+
+      if (pendingAction.type === "copy_password") {
+        const res = await fetch(
+          `/api/credentials/${pendingAction.credentialId}/copy`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-device-id": deviceId,
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setToast({ message: "Copy failed after 2FA", type: "error" });
+          return;
+        }
+
+        const { password } = data;
+
+        const result = await safeClipboardWrite(password);
+        if (result === "unsupported") {
+          setToast({ message: "Clipboard not supported", type: "error" });
+          return;
+        }
+        if (result === "error") {
+          setToast({ message: "Failed to copy password", type: "error" });
+          return;
+        }
+        // If we reach here, the password was successfully copied
+        // Update copied state to show success
+        setCopied((prev) => ({ ...prev, [pendingAction.credentialId]: true }));
+        setTimeout(
+          () =>
+            setCopied((prev) => ({
+              ...prev,
+              [pendingAction.credentialId]: false,
+            })),
+          1000
+        );
+        setToast({
+          message: "Password copied to clipboard!",
+          type: "success",
+        });
+        setPendingAction(null);
+      }
+    } catch (error) {
+      console.error("Error handling 2FA success:", error);
+      setToast({ message: "Failed to handle 2FA success", type: "error" });
     }
   };
 
