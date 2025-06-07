@@ -6,6 +6,7 @@ import CredentialCard from "./CredentialCard";
 import { Credential } from "@/types";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import safeClipboardWrite from "@/utils/safeClipboardWrite";
+import { set } from "zod/v4";
 
 interface CredentialProps {
   credentials: Credential[];
@@ -24,6 +25,10 @@ export default function CredentialsList({
     message: string;
     type: "error" | "success" | "info";
   } | null>(null);
+  const [pendingAction, setPendingAction] = useState<null | {
+    type: "copy_password";
+    credentialId: string;
+  }>(null);
 
   const deviceId = useDeviceId();
 
@@ -94,6 +99,10 @@ export default function CredentialsList({
       const data = await res.json();
 
       if (res.status === 401 && data.error === "2FA required") {
+        setPendingAction({
+          type: "copy_password",
+          credentialId: id,
+        });
         setIsModalOpen(true); // open modal to perform 2FA
         return;
       }
