@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import CredentialDrawer from "@/components/CredentialDrawer";
 import CredentialsList from "@/components/CredentialsList";
-import { DoorOpen, Moon, Sun } from "lucide-react";
-import Toast from "@/components/Toast";
 import Modal from "@/components/Modal";
 import TwoFAVerification from "@/components/TwoFAVerification";
 import { useForm } from "react-hook-form";
@@ -13,13 +11,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import safeClipboardWrite from "@/utils/safeClipboardWrite";
-
-type Credential = {
-  id: string;
-  service: string;
-  username: string;
-  password: string;
-};
+import DashboardHeader from "@/components/DashboardHeader";
+import { ToastProps } from "@/types";
+import { Credential } from "@/types";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -27,10 +21,7 @@ export default function Dashboard() {
   const [userId, setUserId] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [credentials, setCredentials] = useState<Credential[]>([]);
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "error" | "success" | "info";
-  } | null>(null);
+  const [toast, setToast] = useState<ToastProps | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const formSchema = z.object({
@@ -287,32 +278,13 @@ export default function Dashboard() {
           isLoading={isVerifying}
         />
       </Modal>
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold">Dashboard</h1>
-        {toast && (
-          <Toast
-            message="{toast.message}"
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
-        )}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setDarkMode((prev) => !prev)}
-            className="p-2 rounded-full transition"
-            title="Toggle Dark Mode"
-          >
-            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-          <button
-            onClick={handleLogout}
-            className="p-2 rounded-full transition text-red-500 hover:text-red-700"
-            title="Log Out"
-          >
-            <DoorOpen size={20} />
-          </button>
-        </div>
-      </div>
+      <DashboardHeader
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+        toast={toast}
+        setToast={setToast}
+        handleLogout={handleLogout}
+      />
       <CredentialsList
         credentials={credentials}
         setCredentials={setCredentials}

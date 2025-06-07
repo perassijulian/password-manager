@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-type ToastType = "success" | "error" | "info";
-
-interface ToastProps {
-  message: string;
-  type?: ToastType;
-  onClose: () => void;
-  duration?: number; // ms
-}
+import { ToastProps } from "@/types";
 
 const toastColors = {
   success: {
