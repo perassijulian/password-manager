@@ -22,7 +22,7 @@ export default function DashboardHeader({
       <h1 className="text-xl font-bold">Dashboard</h1>
       {toast && (
         <Toast
-          message="{toast.message}"
+          message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
         />

@@ -34,7 +34,9 @@ export default function Toast({
     const enterTimeout = setTimeout(() => setVisible(true), 10);
     const exitTimeout = setTimeout(() => {
       setVisible(false);
-      setTimeout(onClose, 300); // wait for animation to finish
+      if (onClose) {
+        setTimeout(onClose, 300); // wait for animation to finish
+      }
     }, duration);
 
     return () => {

@@ -194,7 +194,6 @@ export default function Dashboard() {
         return;
       }
 
-      setToast({ message: "2FA verified successfully!", type: "success" });
       handle2FASuccess();
       setIsModalOpen(false);
       reset();
