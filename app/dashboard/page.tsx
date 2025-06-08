@@ -24,14 +24,21 @@ export default function Dashboard() {
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
   const deviceId = useDeviceId();
 
-  const { handleCopy, handleSubmit, onSubmit, register, errors } =
-    useCopyWith2FA({
-      deviceId,
-      setToast,
-      setCopied,
-      setIsModalOpen,
-      setIsVerifying,
-    });
+  const {
+    handleCopy,
+    handleSubmit,
+    onSubmit,
+    register,
+    errors,
+    reset,
+    setPendingAction,
+  } = useCopyWith2FA({
+    deviceId,
+    setToast,
+    setCopied,
+    setIsModalOpen,
+    setIsVerifying,
+  });
 
   useEffect(() => {
     async function fetchCredentials() {
@@ -100,7 +107,15 @@ export default function Dashboard() {
 
   return (
     <div className="relative min-h-screen bg-gray-50 p-4 pb-28 w-full">
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          reset();
+          setPendingAction(null);
+          setIsVerifying(false);
+          setIsModalOpen(false);
+        }}
+      >
         <TwoFAVerification
           handleSubmit={handleSubmit}
           onSubmit={onSubmit}

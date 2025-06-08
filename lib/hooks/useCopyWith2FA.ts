@@ -170,5 +170,7 @@ export function useCopyWith2FA({
     onSubmit,
     register,
     errors,
+    reset,
+    setPendingAction,
   };
 }
