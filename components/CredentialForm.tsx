@@ -2,6 +2,7 @@ import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import Button from "./Button";
 import { Credential } from "@/types";
+import { secureFetch } from "@/lib/secureFetch";
 
 interface CredentialFormProps {
   onClick: () => void;
@@ -9,12 +10,14 @@ interface CredentialFormProps {
     toast: { message: string; type: "error" | "success" | "info" } | null
   ) => void;
   setCredentials: React.Dispatch<React.SetStateAction<Credential[]>>;
+  deviceId: string | undefined; // Optional for testing
 }
 
 export default function CredentialForm({
   onClick,
   setToast,
   setCredentials,
+  deviceId,
 }: CredentialFormProps) {
   const [form, setForm] = useState({ service: "", username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -27,11 +30,14 @@ export default function CredentialForm({
     const { service, username, password } = form;
 
     try {
-      const res = await fetch("/api/credentials/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ service, username, password }),
-      });
+      const res = await secureFetch(
+        "/api/credentials/add",
+        {
+          method: "POST",
+          body: JSON.stringify({ service, username, password }),
+        },
+        deviceId
+      );
       setForm({ service: "", username: "", password: "" }); // clear ASAP
       // May be better to clear after response
       // to avoid showing stale data in case of error.

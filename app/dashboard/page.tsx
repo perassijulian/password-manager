@@ -11,6 +11,7 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { ToastProps } from "@/types";
 import { Credential } from "@/types";
 import { useCopyWith2FA } from "@/lib/hooks/useCopyWith2FA";
+import { secureFetch } from "@/lib/secureFetch";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -43,7 +44,11 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchCredentials() {
       try {
-        const res = await fetch("/api/credentials");
+        const res = await secureFetch(
+          "/api/credentials",
+          { method: "GET" },
+          deviceId || undefined
+        );
         const data = await res.json();
         if (!res.ok)
           throw new Error(data.error || "Failed to load credentials");

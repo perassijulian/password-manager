@@ -5,6 +5,7 @@ import CredentialForm from "./CredentialForm";
 import CredentialToggleButton from "./CredentialToggleButton";
 import Toast from "./Toast";
 import { Credential } from "@/types";
+import { useDeviceId } from "@/lib/hooks/useDeviceId";
 
 interface CredentialDrawerProps {
   setCredentials: React.Dispatch<React.SetStateAction<Credential[]>>;
@@ -18,6 +19,7 @@ export default function CredentialDrawer({
     message: string;
     type: "error" | "success" | "info";
   } | null>(null);
+  const deviceId = useDeviceId();
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -52,6 +54,7 @@ export default function CredentialDrawer({
           setToast={setToast}
           onClick={() => setShowForm((prev) => !prev)}
           setCredentials={setCredentials}
+          deviceId={deviceId}
         />
       </div>
     </div>

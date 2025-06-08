@@ -4,6 +4,7 @@ import { useState } from "react";
 import Toast from "./Toast";
 import CredentialCard from "./CredentialCard";
 import { Credential } from "@/types";
+import { secureFetch } from "@/lib/secureFetch";
 
 interface CredentialProps {
   credentials: Credential[];
@@ -42,12 +43,10 @@ export default function CredentialsList({
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this credential?")) return;
     try {
-      const res = await fetch(`/api/credentials/${id}`, {
+      const res = await secureFetch(`/api/credentials/${id}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
+
       const data = await res.json();
 
       if (!res.ok) {

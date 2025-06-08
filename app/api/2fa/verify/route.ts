@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
 import { checkRateLimit } from "@/lib/checkRateLimit";
 import { authorizeSensitiveAction } from "@/utils/authorizeSensitiveAction";
+import { randomBytes } from "crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -77,6 +78,8 @@ export async function POST(req: NextRequest) {
         expiresIn: "1h",
       });
 
+      const csrfToken = randomBytes(32).toString("hex");
+
       const response = NextResponse.json({ success: true });
       response.headers.set(
         "Set-Cookie",
@@ -86,6 +89,13 @@ export async function POST(req: NextRequest) {
             secure: process.env.NODE_ENV === "production",
             path: "/",
             maxAge: 60 * 60, // 1 hour
+          }),
+          serialize("csrf_token", csrfToken, {
+            httpOnly: false, // frontend needs to read it
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+            maxAge: 60 * 60,
           }),
           serialize("temp_token", "", {
             httpOnly: true,

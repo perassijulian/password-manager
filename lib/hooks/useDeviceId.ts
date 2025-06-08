@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-export function useDeviceId(): string | null {
-  const [deviceId, setDeviceId] = useState<string | null>(null);
+export function useDeviceId(): string | undefined {
+  const [deviceId, setDeviceId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     let stored = localStorage.getItem("deviceId");

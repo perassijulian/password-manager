@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ToastProps } from "@/types";
+import { secureFetch } from "../secureFetch";
 
 export function useCopyWith2FA({
   deviceId,
@@ -12,7 +13,7 @@ export function useCopyWith2FA({
   setIsModalOpen,
   setIsVerifying,
 }: {
-  deviceId: string | null;
+  deviceId: string | undefined;
   setToast: (toast: ToastProps | null) => void;
   setCopied: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
   setIsModalOpen: (isOpen: boolean) => void;
@@ -37,13 +38,13 @@ export function useCopyWith2FA({
   } = useForm<FormData>({ resolver: zodResolver(formSchema) });
 
   const copyPassword = async (id: string) => {
-    const res = await fetch(`/api/credentials/${id}/copy`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-device-id": deviceId || "",
+    const res = await secureFetch(
+      `/api/credentials/${id}/copy`,
+      {
+        method: "POST",
       },
-    });
+      deviceId
+    );
 
     const data = await res.json();
 
@@ -95,7 +96,6 @@ export function useCopyWith2FA({
     try {
       await copyPassword(id);
     } catch (error: any) {
-      console.error("Error copying password MESSAGE:", error.message);
       if (error.message === "2FA required") {
         setPendingAction({
           type: "copy_password",
