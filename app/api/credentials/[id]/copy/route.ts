@@ -17,11 +17,13 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 1. Rate limiting
     const rateLimitCheck = await checkRateLimit(req);
     if (!rateLimitCheck.ok) {
       return rateLimitCheck.response;
     }
 
+    // 2. Validate route params
     const rawParams = await context.params;
     const parseResult = ParamsSchema.safeParse(rawParams);
     if (!parseResult.success) {
@@ -32,6 +34,7 @@ export async function POST(
     }
     const { id: parsedId } = parseResult.data;
 
+    // 3. Validate API request (CSRF + device ID)
     const cookieStore = await cookies();
     const validation = validateApiRequest(req.headers, cookieStore);
     if (!validation.valid) {
@@ -42,6 +45,7 @@ export async function POST(
       return NextResponse.json({ error: "Device ID missing" }, { status: 400 });
     }
 
+    // 4. Validate token
     const token = req.cookies.get("token")?.value;
     if (!token)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -50,6 +54,7 @@ export async function POST(
     if (!payload)
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });
 
+    // 5. Authorize sensitive action
     const authResult = await authorizeSensitiveAction(
       payload.userId,
       "copy_password",
@@ -61,6 +66,7 @@ export async function POST(
       return NextResponse.json({ error: "2FA required" }, { status: 401 });
     }
 
+    // 6. Fetch and decrypt credential
     const credential = await prisma.credential.findUnique({
       where: { id: parsedId, userId: payload.userId },
     });
@@ -74,6 +80,7 @@ export async function POST(
 
     const decryptedPassword = decrypt(credential.password);
 
+    // 7. Return success
     return NextResponse.json({ password: decryptedPassword }, { status: 200 });
   } catch (error) {
     console.error("POST /api/credentials/[id]/copy error:", error);
