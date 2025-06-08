@@ -28,7 +28,6 @@ export default function Dashboard() {
     useCopyWith2FA({
       deviceId,
       setToast,
-      copied,
       setCopied,
       setIsModalOpen,
       setIsVerifying,
