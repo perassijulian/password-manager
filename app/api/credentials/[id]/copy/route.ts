@@ -20,9 +20,8 @@ export async function POST(
       return rateLimitCheck.response;
     }
 
-    const { id } = await context.params;
-
-    const parseResult = ParamsSchema.safeParse({ id });
+    const rawParams = await context.params;
+    const parseResult = ParamsSchema.safeParse(rawParams);
     if (!parseResult.success) {
       return NextResponse.json(
         { error: "Invalid credential ID" },
@@ -38,6 +37,16 @@ export async function POST(
     const payload = await verifyToken(token);
     if (!payload)
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+
+    const csrfTokenFromCookie = req.cookies.get("csrf_token")?.value;
+    const csrfTokenFromHeader = req.headers.get("x-csrf-token");
+
+    if (!csrfTokenFromCookie || csrfTokenFromHeader !== csrfTokenFromCookie) {
+      return NextResponse.json(
+        { error: "Invalid CSRF token" },
+        { status: 403 }
+      );
+    }
 
     const deviceId = req.headers.get("x-device-id") ?? "";
 
