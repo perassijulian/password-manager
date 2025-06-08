@@ -5,6 +5,8 @@ import { decrypt } from "@/lib/crypto";
 import { checkRateLimit } from "@/lib/checkRateLimit";
 import { z } from "zod";
 import { authorizeSensitiveAction } from "@/utils/authorizeSensitiveAction";
+import { validateApiRequest } from "@/lib/secureApi";
+import { cookies } from "next/headers";
 
 const ParamsSchema = z.object({
   id: z.string().cuid(),
@@ -30,6 +32,16 @@ export async function POST(
     }
     const { id: parsedId } = parseResult.data;
 
+    const cookieStore = await cookies();
+    const validation = validateApiRequest(req.headers, cookieStore);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 403 });
+    }
+    const deviceId = validation.deviceId;
+    if (!deviceId) {
+      return NextResponse.json({ error: "Device ID missing" }, { status: 400 });
+    }
+
     const token = req.cookies.get("token")?.value;
     if (!token)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -38,28 +50,17 @@ export async function POST(
     if (!payload)
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });
 
-    const csrfTokenFromCookie = req.cookies.get("csrf_token")?.value;
-    const csrfTokenFromHeader = req.headers.get("x-csrf-token");
-
-    if (!csrfTokenFromCookie || csrfTokenFromHeader !== csrfTokenFromCookie) {
-      return NextResponse.json(
-        { error: "Invalid CSRF token" },
-        { status: 403 }
-      );
-    }
-
-    const deviceId = req.headers.get("x-device-id") ?? "";
-
-    const result = await authorizeSensitiveAction(
+    const authResult = await authorizeSensitiveAction(
       payload.userId,
       "copy_password",
       "sensitive",
       deviceId
     );
 
-    if (result !== true) {
+    if (authResult !== true) {
       return NextResponse.json({ error: "2FA required" }, { status: 401 });
     }
+
     const credential = await prisma.credential.findUnique({
       where: { id: parsedId, userId: payload.userId },
     });
@@ -71,9 +72,9 @@ export async function POST(
       );
     }
 
-    const fullPassword = decrypt(credential.password);
+    const decryptedPassword = decrypt(credential.password);
 
-    return NextResponse.json({ password: fullPassword }, { status: 200 });
+    return NextResponse.json({ password: decryptedPassword }, { status: 200 });
   } catch (error) {
     console.error("POST /api/credentials/[id]/copy error:", error);
     return NextResponse.json(
