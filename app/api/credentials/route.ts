@@ -16,7 +16,6 @@ type Credential = {
 
 export async function GET(req: NextRequest) {
   try {
-    console.log("GETING 12312312312312312");
     // Perform rate limiting, parameter validation, CSRF/device checks, and token authentication
     const secure = await validateSecureRequest({
       req,
@@ -25,7 +24,6 @@ export async function GET(req: NextRequest) {
     });
     if (!secure.ok) return secure.response;
 
-    console.log(secure, "1232132312312312");
     const { payload } = secure;
 
     // Get all the credentials from the user
@@ -34,7 +32,6 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    console.log(credentials, "CREDENTIALS!!!!!!!!!!!");
     // Decrypt the password beggining and ending
     const decrypted = credentials.map((c: Credential) => ({
       id: c.id,
@@ -51,5 +48,11 @@ export async function GET(req: NextRequest) {
 
     // Return success
     return NextResponse.json({ credentials: decrypted }, { status: 200 });
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error in GET /api/credentials", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

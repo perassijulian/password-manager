@@ -5,26 +5,40 @@ import argon2 from "argon2";
 import { z } from "zod";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { checkRateLimit } from "@/lib/checkRateLimit";
-import { hash } from "crypto";
 
-const schema = z.object({
+const ParamsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
 
 export async function POST(req: NextRequest) {
   try {
+    // 1. Rate Limiting
     const rateLimitCheck = await checkRateLimit(req);
     if (!rateLimitCheck.ok) {
       return rateLimitCheck.response;
     }
-    const body = await req.json();
-    const { email, password } = schema.parse(body);
+
+    // 2. Validate route params
+    const rawParams = await req.json();
+    const parseResult = ParamsSchema.safeParse(rawParams);
+    if (!parseResult.success) {
+      console.error("Invalid request parameters:", parseResult.error);
+      return NextResponse.json(
+        { error: "Invalid request parameters" },
+        { status: 400 }
+      );
+    }
+    let { password, email } = parseResult.data;
+    email = email.toLowerCase().trim();
+
+    // 3. Hash password
     const hashedPassword = await argon2.hash(password);
     const user = await prisma.user.create({
       data: { email, password: hashedPassword },
     });
 
+    // 4. Return success
     return NextResponse.json(
       { message: "User created", userId: user.id },
       { status: 201 }
@@ -38,7 +52,7 @@ export async function POST(req: NextRequest) {
         );
       }
     }
-
+    console.error("Error in POST /api/signup", error);
     return NextResponse.json(
       { error: "Invalid input or server error" },
       { status: 500 }
