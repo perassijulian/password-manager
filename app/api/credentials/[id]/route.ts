@@ -20,11 +20,11 @@ export async function DELETE(
     });
     if (!secure.ok) return secure.response;
 
-    const { parsedParams, payload } = await secure;
+    const { parsedParams, payload } = secure;
 
     // Optional: wrap this in authorizeSensitiveAction if this becomes a
     // sensitive action
-    // 5. Authorize sensitive action
+    // Authorize sensitive action
     // const authResult = await authorizeSensitiveAction(
     //   payload.userId,
     //   "copy_password",
@@ -36,7 +36,7 @@ export async function DELETE(
     //   return NextResponse.json({ error: "2FA required" }, { status: 401 });
     // }
 
-    // 6. Fetch credential
+    // Fetch credential
     const { id } = parsedParams;
     const credential = await prisma.credential.findUnique({
       where: { id, userId: payload.userId },
@@ -49,7 +49,7 @@ export async function DELETE(
       );
     }
 
-    // 7. Delete credential
+    // Delete credential
     try {
       await prisma.credential.delete({ where: { id } });
     } catch (err: any) {
@@ -63,7 +63,7 @@ export async function DELETE(
       throw err;
     }
 
-    // 8. Return success
+    // Return success
     return NextResponse.json(
       { message: "Deleted successfully" },
       { status: 200 }
