@@ -5,6 +5,7 @@ import Toast from "./Toast";
 import CredentialCard from "./CredentialCard";
 import { Credential } from "@/types";
 import { secureFetch } from "@/lib/secureFetch";
+import { useDeviceId } from "@/lib/hooks/useDeviceId";
 
 interface CredentialProps {
   credentials: Credential[];
@@ -24,6 +25,7 @@ export default function CredentialsList({
     message: string;
     type: "error" | "success" | "info";
   } | null>(null);
+  const deviceId = useDeviceId();
 
   function toggleReveal(id: string) {
     setRevealed((prev) => {
@@ -43,9 +45,13 @@ export default function CredentialsList({
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this credential?")) return;
     try {
-      const res = await secureFetch(`/api/credentials/${id}`, {
-        method: "DELETE",
-      });
+      const res = await secureFetch(
+        `/api/credentials/${id}`,
+        {
+          method: "DELETE",
+        },
+        deviceId
+      );
 
       const data = await res.json();
 

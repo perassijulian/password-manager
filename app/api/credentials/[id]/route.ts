@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { verifyToken } from "@/utils/verifyToken";
 import { checkRateLimit } from "@/lib/checkRateLimit";
+import { cookies } from "next/headers";
+import { validateApiRequest } from "@/lib/secureApi";
 
 const ParamsSchema = z.object({
   id: z.string().cuid(),
@@ -13,9 +15,15 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params;
+    // 1. Rate Limiting
+    const rateLimitCheck = await checkRateLimit(req);
+    if (!rateLimitCheck.ok) {
+      return rateLimitCheck.response;
+    }
 
-    const parseResult = ParamsSchema.safeParse({ id });
+    // 2. Validate route params
+    const rawParams = await context.params;
+    const parseResult = ParamsSchema.safeParse(rawParams);
     if (!parseResult.success) {
       return NextResponse.json(
         { error: "Invalid credential ID" },
@@ -24,6 +32,18 @@ export async function DELETE(
     }
     const { id: parsedId } = parseResult.data;
 
+    // 3. Validate API request (CSRF + device ID)
+    const cookieStore = await cookies();
+    const validation = validateApiRequest(req.headers, cookieStore);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 403 });
+    }
+    const deviceId = validation.deviceId;
+    if (!deviceId) {
+      return NextResponse.json({ error: "Device ID missing" }, { status: 400 });
+    }
+
+    // 4. Validate token
     const token = req.cookies.get("token")?.value;
     if (!token)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -32,13 +52,23 @@ export async function DELETE(
     if (!payload)
       return NextResponse.json({ error: "Invalid token" }, { status: 403 });
 
-    const rateLimitCheck = await checkRateLimit(req);
-    if (!rateLimitCheck.ok) {
-      return rateLimitCheck.response;
-    }
+    // Optional: wrap this in authorizeSensitiveAction if this becomes a
+    // sensitive action
+    // 5. Authorize sensitive action
+    // const authResult = await authorizeSensitiveAction(
+    //   payload.userId,
+    //   "copy_password",
+    //   "sensitive",
+    //   deviceId
+    // );
+    //
+    // if (authResult !== true) {
+    //   return NextResponse.json({ error: "2FA required" }, { status: 401 });
+    // }
 
+    // 6. Fetch credential
     const credential = await prisma.credential.findUnique({
-      where: { id: parsedId },
+      where: { id: parsedId, userId: payload.userId },
     });
 
     if (!credential || credential.userId !== payload.userId) {
@@ -48,6 +78,7 @@ export async function DELETE(
       );
     }
 
+    // 7. Delete credential
     try {
       await prisma.credential.delete({ where: { id: parsedId } });
     } catch (err: any) {
@@ -61,6 +92,7 @@ export async function DELETE(
       throw err;
     }
 
+    // 8. Return success
     return NextResponse.json(
       { message: "Deleted successfully" },
       { status: 200 }
