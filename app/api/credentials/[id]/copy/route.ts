@@ -19,6 +19,7 @@ export async function POST(
       req,
       context,
       ParamsSchema,
+      source: "params",
     });
     if (!secure.ok) return secure.response;
 

@@ -19,10 +19,12 @@ export default async function validateSecureRequest<T extends z.ZodTypeAny>({
   req,
   context,
   ParamsSchema,
+  source,
 }: {
   req: NextRequest;
-  context: { params: Promise<{ id: string }> };
+  context?: { params: Promise<{ id: string }> };
   ParamsSchema: T;
+  source: "body" | "params";
 }): Promise<Result<z.infer<T>>> {
   // 1. Rate Limiting
   const rateLimitCheck = await checkRateLimit(req);
@@ -30,14 +32,22 @@ export default async function validateSecureRequest<T extends z.ZodTypeAny>({
     return { ok: false, response: rateLimitCheck.response };
   }
 
-  // 2. Validate route params
-  const rawParams = await context.params;
+  // 2. Validate route params or body (if provided)
+  let rawParams;
+  if (source === "params" && context?.params) {
+    rawParams = await context.params;
+  } else if (source === "body") {
+    rawParams = await req.json();
+  } else {
+    rawParams = {}; // fallback to empty object
+  }
+
   const parseResult = ParamsSchema.safeParse(rawParams);
   if (!parseResult.success) {
     return {
       ok: false,
       response: NextResponse.json(
-        { error: "Invalid credential ID" },
+        { error: "Invalid Invalid request parameters" },
         { status: 400 }
       ),
     };

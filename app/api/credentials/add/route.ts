@@ -2,11 +2,10 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/crypto";
-import { verifyToken } from "@/utils/verifyToken";
-import { checkRateLimit } from "@/lib/checkRateLimit";
 import { z } from "zod";
+import validateSecureRequest from "@/lib/validateSecureRequest";
 
-const CredentialSchema = z.object({
+const ParamsSchema = z.object({
   service: z.string().min(1),
   username: z.string().min(1),
   password: z.string().min(1),
@@ -14,33 +13,21 @@ const CredentialSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const token = req.cookies.get("token")?.value;
-    if (!token)
-      return NextResponse.json(
-        { error: "Unauthorized, missing token" },
-        { status: 401 }
-      );
-    const payload = await verifyToken(token);
-    if (!payload)
-      return NextResponse.json(
-        { error: "Unauthorized, missing payload" },
-        { status: 401 }
-      );
+    // Perform rate limiting, parameter validation, CSRF/device checks, and token authentication
+    const secure = await validateSecureRequest({
+      req,
+      ParamsSchema,
+      source: "body",
+    });
+    if (!secure.ok) return secure.response;
 
-    const rateLimitCheck = await checkRateLimit(req);
-    if (!rateLimitCheck.ok) {
-      return rateLimitCheck.response;
-    }
+    const { parsedParams, payload } = secure;
 
-    const result = CredentialSchema.safeParse(body);
-    if (!result.success) {
-      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
-    }
-    const { service, username, password } = result.data;
-
+    // Encrypt password
+    const { service, username, password } = parsedParams;
     const encryptedPassword = encrypt(password);
 
+    // Create new credential
     const credential = await prisma.credential.create({
       data: {
         userId: payload.userId,
@@ -50,6 +37,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Return success
     return NextResponse.json(
       {
         credential: {
