@@ -24,7 +24,7 @@ export default async function validateSecureRequest<T extends z.ZodTypeAny>({
   req: NextRequest;
   context?: { params: Promise<{ id: string }> };
   ParamsSchema: T;
-  source: "body" | "params";
+  source: "body" | "params" | "none";
 }): Promise<Result<z.infer<T>>> {
   // 1. Rate Limiting
   const rateLimitCheck = await checkRateLimit(req);
@@ -33,13 +33,21 @@ export default async function validateSecureRequest<T extends z.ZodTypeAny>({
   }
 
   // 2. Validate route params or body (if provided)
-  let rawParams;
+  let rawParams = {};
   if (source === "params" && context?.params) {
     rawParams = await context.params;
   } else if (source === "body") {
-    rawParams = await req.json();
-  } else {
-    rawParams = {}; // fallback to empty object
+    try {
+      rawParams = await req.json();
+    } catch (error) {
+      return {
+        ok: false,
+        response: NextResponse.json(
+          { error: "Invalid or missing request body" },
+          { status: 400 }
+        ),
+      };
+    }
   }
 
   const parseResult = ParamsSchema.safeParse(rawParams);

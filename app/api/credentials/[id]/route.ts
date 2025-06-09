@@ -17,6 +17,7 @@ export async function DELETE(
       req,
       context,
       ParamsSchema,
+      source: "params",
     });
     if (!secure.ok) return secure.response;
 

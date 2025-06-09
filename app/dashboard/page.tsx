@@ -47,7 +47,7 @@ export default function Dashboard() {
         const res = await secureFetch(
           "/api/credentials",
           { method: "GET" },
-          deviceId || undefined
+          deviceId
         );
         const data = await res.json();
         if (!res.ok)
@@ -64,8 +64,10 @@ export default function Dashboard() {
       }
     }
 
-    fetchCredentials();
-  }, []);
+    if (deviceId) {
+      fetchCredentials();
+    }
+  }, [deviceId]);
 
   useEffect(() => {
     const fetchUser = async () => {
