@@ -2,7 +2,11 @@ import { getClientIp } from "@/utils/getClientIp";
 import { rateLimiter } from "@/lib/rateLimiter";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function checkRateLimit(req: NextRequest) {
+type RateLimitResult = { ok: true } | { ok: false; response: NextResponse };
+
+export async function checkRateLimit(
+  req: NextRequest
+): Promise<RateLimitResult> {
   try {
     const ip = getClientIp(req);
     if (!ip)

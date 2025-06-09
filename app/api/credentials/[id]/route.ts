@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { verifyToken } from "@/utils/verifyToken";
-import { checkRateLimit } from "@/lib/checkRateLimit";
-import { cookies } from "next/headers";
-import { validateApiRequest } from "@/lib/secureApi";
+import validateSecureRequest from "@/lib/validateSecureRequest";
 
 const ParamsSchema = z.object({
   id: z.string().cuid(),
@@ -15,42 +12,15 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 1. Rate Limiting
-    const rateLimitCheck = await checkRateLimit(req);
-    if (!rateLimitCheck.ok) {
-      return rateLimitCheck.response;
-    }
+    // Perform rate limiting, parameter validation, CSRF/device checks, and token authentication
+    const secure = await validateSecureRequest({
+      req,
+      context,
+      ParamsSchema,
+    });
+    if (!secure.ok) return secure.response;
 
-    // 2. Validate route params
-    const rawParams = await context.params;
-    const parseResult = ParamsSchema.safeParse(rawParams);
-    if (!parseResult.success) {
-      return NextResponse.json(
-        { error: "Invalid credential ID" },
-        { status: 400 }
-      );
-    }
-    const { id: parsedId } = parseResult.data;
-
-    // 3. Validate API request (CSRF + device ID)
-    const cookieStore = await cookies();
-    const validation = validateApiRequest(req.headers, cookieStore);
-    if (!validation.valid) {
-      return NextResponse.json({ error: validation.error }, { status: 403 });
-    }
-    const deviceId = validation.deviceId;
-    if (!deviceId) {
-      return NextResponse.json({ error: "Device ID missing" }, { status: 400 });
-    }
-
-    // 4. Validate token
-    const token = req.cookies.get("token")?.value;
-    if (!token)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const payload = await verifyToken(token);
-    if (!payload)
-      return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+    const { parsedParams, payload } = await secure;
 
     // Optional: wrap this in authorizeSensitiveAction if this becomes a
     // sensitive action
@@ -67,8 +37,9 @@ export async function DELETE(
     // }
 
     // 6. Fetch credential
+    const { id } = parsedParams;
     const credential = await prisma.credential.findUnique({
-      where: { id: parsedId, userId: payload.userId },
+      where: { id, userId: payload.userId },
     });
 
     if (!credential || credential.userId !== payload.userId) {
@@ -80,7 +51,7 @@ export async function DELETE(
 
     // 7. Delete credential
     try {
-      await prisma.credential.delete({ where: { id: parsedId } });
+      await prisma.credential.delete({ where: { id } });
     } catch (err: any) {
       if (err.code === "P2025") {
         // Prisma "record not found"
