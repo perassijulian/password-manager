@@ -50,12 +50,15 @@ export default function Dashboard() {
           deviceId
         );
         const data = await res.json();
-        if (!res.ok)
-          throw new Error(data.error || "Failed to load credentials");
+        if (!res.ok) console.error("Failed to load credentials: ", data.error);
+        setToast({
+          message: "Failed to load credentials",
+          type: "error",
+        });
         setCredentials(data.credentials);
       } catch (err: any) {
         setToast({
-          message: err.message || "Failed to load credentials",
+          message: "Failed to load credentials",
           type: "error",
         });
         console.error("Error fetching credentials:", err);

@@ -42,8 +42,12 @@ export default function Setup() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
-        if (!res.ok) throw new Error("Failed to get QR code");
         const data = await res.json();
+        if (!res.ok) {
+          console.error("Failed to get QR code: ", data.error);
+          setToast({ message: "Failed to get QR code", type: "error" });
+          return;
+        }
         setQrCode(data.qrCode);
         setSetupUrl(data.otpauth);
       } catch (err) {
