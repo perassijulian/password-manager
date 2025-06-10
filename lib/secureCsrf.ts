@@ -11,7 +11,7 @@ function safeCompare(a: string, b: string): boolean {
   return timingSafeEqual(aBuf, bBuf);
 }
 
-export function validateApiRequest(
+export function validateCsrfRequest(
   headers: Headers,
   cookies: ReadonlyRequestCookies
 ) {

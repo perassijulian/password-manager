@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { checkRateLimit } from "./checkRateLimit";
-import { validateApiRequest } from "./secureApi";
+import { validateCsrfRequest } from "./secureCsrf";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/utils/verifyToken";
 import { z } from "zod";
@@ -63,7 +63,7 @@ export default async function validateSecureRequest<T extends z.ZodTypeAny>({
 
   // 3. Validate API request (CSRF + device ID)
   const cookieStore = await cookies();
-  const validation = validateApiRequest(req.headers, cookieStore);
+  const validation = validateCsrfRequest(req.headers, cookieStore);
   if (!validation.valid) {
     return {
       ok: false,
