@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import { ActionType } from "@/types";
+import { ActionType, ContextType } from "@/types";
 import { NextResponse } from "next/server";
 
 export async function authorizeSensitiveAction(
   userId: string,
   actionType: ActionType,
-  context: string,
+  context: ContextType,
   deviceId: string
 ): Promise<true | NextResponse> {
   const challenge = await prisma.twoFAChallenge.findFirst({

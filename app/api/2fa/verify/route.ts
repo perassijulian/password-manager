@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { withRateLimit } from "@/lib/withRateLimit";
 import { handleLogin2FA } from "@/handlers/2fa/handleLogin2FA";
 import { handleSensitive2FA } from "@/handlers/2fa/handleSensitive2FA";
-import { actionTypeEnum } from "@/types";
+import { actionTypeEnum, contextTypeEnum } from "@/types";
 
 const schema = z.object({
   code: z.string().length(6),
   deviceId: z.string(),
-  context: z.enum(["login", "sensitive"]),
+  context: contextTypeEnum,
   actionType: actionTypeEnum,
 });
 

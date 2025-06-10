@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
+import { ActionType, ContextType } from "@/types";
 
 type Params = {
   userId: string;
   deviceId?: string;
-  context: string;
-  actionType?: string;
+  context: ContextType;
+  actionType?: ActionType;
 };
 
 export async function markTwoFAChallengeVerified({
