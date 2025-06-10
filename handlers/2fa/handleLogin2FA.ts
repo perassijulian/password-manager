@@ -6,6 +6,7 @@ import { verify2FA } from "@/lib/2fa";
 import jwt from "jsonwebtoken";
 import { randomBytes } from "crypto";
 import { serialize } from "cookie";
+import { ActionType } from "@/types";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -15,16 +16,18 @@ export async function handleLogin2FA(
     code,
     deviceId,
     actionType,
-  }: { code: string; deviceId: string; actionType: string }
+  }: { code: string; deviceId: string; actionType: ActionType }
 ) {
-  // 3. Auth token
+  // 1. Auth token
   const payload = await verifyTempToken(req);
   if (payload instanceof NextResponse) return payload;
 
+  // 2. Find user
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
   });
 
+  // 3. Check if user already set 2FA secret and verify it
   if (!user || !user.twoFactorSecret)
     return NextResponse.json({ error: "2FA secret missing" }, { status: 500 });
 
@@ -40,6 +43,7 @@ export async function handleLogin2FA(
       data: { twoFactorEnabled: true },
     });
 
+  // 4. Log user into twoFAChallange
   await prisma.twoFAChallenge.create({
     data: {
       userId: user.id,
@@ -55,11 +59,12 @@ export async function handleLogin2FA(
     },
   });
 
+  // 5. Sign token and set to cookies
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
     expiresIn: "1h",
   });
 
-  const csrfToken = randomBytes(32).toString("hex");
+  const csrfToken = crypto.randomUUID();
 
   const response = NextResponse.json({ success: true });
   response.headers.set(
@@ -68,6 +73,7 @@ export async function handleLogin2FA(
       serialize("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
         path: "/",
         maxAge: 60 * 60, // 1 hour
       }),

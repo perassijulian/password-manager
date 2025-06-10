@@ -14,17 +14,20 @@ export async function handleSensitive2FA(
     actionType,
   }: { code: string; deviceId: string; actionType: ActionType }
 ) {
-  // 3. Auth token
+  // 1. Auth token
   const payload = await verifyUserToken(req);
   if (payload instanceof NextResponse) return payload;
 
+  // 2. Find user
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
   });
 
+  // 3. Check if user already set 2FA secret
   if (!user || !user.twoFactorSecret)
     return NextResponse.json({ error: "2FA secret missing" }, { status: 500 });
 
+  // 4. Check if user did challenge not long time ago
   const isAlreadyAuthorized = await authorizeSensitiveAction(
     user.id,
     actionType,
@@ -32,6 +35,8 @@ export async function handleSensitive2FA(
     deviceId
   );
 
+  // 5. If auth not long time ago, update challenge time
+  // and return with success: true
   if (isAlreadyAuthorized === true) {
     await prisma.twoFAChallenge.updateMany({
       where: {
@@ -49,6 +54,8 @@ export async function handleSensitive2FA(
     });
     return NextResponse.json({ success: true });
   }
+
+  // 6. If not already auth, verify code
   const secret = decrypt(user.twoFactorSecret);
   const valid = verify2FA(secret, code);
 
@@ -56,6 +63,7 @@ export async function handleSensitive2FA(
     return NextResponse.json({ error: "Invalid code" }, { status: 403 });
   }
 
+  // 7. Create twoFAChallenge and return with success: true
   await prisma.twoFAChallenge.create({
     data: {
       userId: user.id,
