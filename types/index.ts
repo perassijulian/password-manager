@@ -1,3 +1,7 @@
+import { z } from "zod";
+export const actionTypeEnum = z.enum(["copy_password", "login"]);
+export type ActionType = z.infer<typeof actionTypeEnum>;
+
 export interface JWTPayload {
   userId: string;
   iat?: number;

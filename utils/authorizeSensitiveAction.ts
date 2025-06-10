@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma";
+import { ActionType } from "@/types";
 import { NextResponse } from "next/server";
 
 export async function authorizeSensitiveAction(
   userId: string,
-  actionType: string,
+  actionType: ActionType,
   context: string,
   deviceId: string
 ): Promise<true | NextResponse> {
