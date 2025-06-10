@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/utils/verifyToken";
+import { verifyUserToken } from "@/utils/auth";
 
 export async function GET(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
-
-  if (!token)
-    return NextResponse.json({ error: "No token provided" }, { status: 401 });
-
-  const payload = await verifyToken(token);
-
-  if (!payload)
-    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-
-  return NextResponse.json({ userId: payload.userId }, { status: 200 });
+  try {
+    const payload = await verifyUserToken(req);
+    if (payload instanceof NextResponse) return payload;
+    return NextResponse.json({ userId: payload.userId }, { status: 200 });
+  } catch (error) {
+    console.error("Error while GET /api/me");
+    return NextResponse.json(
+      { error: "Error while GET /api/me" },
+      { status: 500 }
+    );
+  }
 }

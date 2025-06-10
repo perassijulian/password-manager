@@ -1,15 +1,14 @@
 import { verify2FA } from "@/lib/2fa";
 import { decrypt } from "@/lib/crypto";
 import { prisma } from "@/lib/prisma";
-import { verifyToken } from "@/utils/verifyToken";
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { serialize } from "cookie";
-import { checkRateLimit } from "@/lib/checkRateLimit";
 import { authorizeSensitiveAction } from "@/utils/authorizeSensitiveAction";
 import { randomBytes } from "crypto";
 import { withRateLimit } from "@/lib/withRateLimit";
+import { verifyTempToken, verifyUserToken } from "@/utils/auth";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -22,23 +21,23 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    // 1. Rate Limiting
     return withRateLimit(req, async () => {
-      const rateLimitCheck = await checkRateLimit(req);
-      if (!rateLimitCheck.ok) {
-        return rateLimitCheck.response;
-      }
-
-      const result = schema.parse(await req.json());
-      const { code, deviceId, context, actionType } = result;
+      // 2. Validate body
+      const rawParams = await req.json();
+      const parseResult = schema.safeParse(rawParams);
+      if (!parseResult.success)
+        return NextResponse.json(
+          { error: "Invalid Invalid request parameters" },
+          { status: 400 }
+        );
+      const { code, deviceId, context, actionType } = parseResult.data;
 
       if (context === "login") {
-        const temp_token = req.cookies.get("temp_token")?.value;
-        if (!temp_token)
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        // 3. Auth token
+        const payload = await verifyTempToken(req);
+        if (payload instanceof NextResponse) return payload;
 
-        const payload = await verifyToken(temp_token);
-        if (!payload)
-          return NextResponse.json({ error: "Invalid token" }, { status: 403 });
         const user = await prisma.user.findUnique({
           where: { id: payload.userId },
         });
@@ -111,13 +110,9 @@ export async function POST(req: NextRequest) {
       }
 
       if (context === "sensitive") {
-        const token = req.cookies.get("token")?.value;
-        if (!token)
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-        const payload = await verifyToken(token);
-        if (!payload)
-          return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+        // 3. Auth token
+        const payload = await verifyUserToken(req);
+        if (payload instanceof NextResponse) return payload;
 
         const user = await prisma.user.findUnique({
           where: { id: payload.userId },

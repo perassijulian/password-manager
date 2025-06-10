@@ -1,20 +1,17 @@
 import { generate2FASecret, generateQRCode } from "@/lib/2fa";
 import { encrypt } from "@/lib/crypto";
-import { verifyToken } from "@/utils/verifyToken";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withRateLimit } from "@/lib/withRateLimit";
+import { verifyTempToken } from "@/utils/auth";
 
 export async function POST(req: NextRequest) {
   try {
+    // 1. Rate Limiting
     return withRateLimit(req, async () => {
-      const token = req.cookies.get("temp_token")?.value;
-      if (!token)
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-      const payload = await verifyToken(token);
-      if (!payload)
-        return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+      // 2. Auth token
+      const payload = await verifyTempToken(req);
+      if (payload instanceof NextResponse) return payload;
 
       const user = await prisma.user.findUnique({
         where: { id: payload.userId },

@@ -15,6 +15,7 @@ const loginSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    // 1. Rate Limiting
     return withRateLimit(req, async () => {
       const body = await req.json();
       const { email, password } = loginSchema.parse(body);
