@@ -3,7 +3,7 @@ export const actionTypeEnum = z.enum(["copy_password", "login"]);
 export type ActionType = z.infer<typeof actionTypeEnum>;
 
 export const contextTypeEnum = z.enum(["sensitive", "login"]);
-export type ContextType = z.infer<typeof actionTypeEnum>;
+export type ContextType = z.infer<typeof contextTypeEnum>;
 
 export interface JWTPayload {
   userId: string;
