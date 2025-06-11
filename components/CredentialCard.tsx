@@ -27,28 +27,28 @@ export default function CredentialCard({
   return (
     <div
       key={cred.id}
-      className="p-5 bg-white border border-gray-200 rounded-2xl shadow-md transition hover:shadow-lg flex flex-col md:flex-row md:items-center justify-between space-y-3 md:space-y-0"
+      className="p-5 bg-background-secondary border border-border rounded-2xl shadow-md transition hover:shadow-lg flex flex-col md:flex-row md:items-center justify-between space-y-3 md:space-y-0"
     >
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
-          <p className="text-lg font-medium text-gray-900">{cred.service}</p>
+          <p className="text-foreground text-lg font-medium">{cred.service}</p>
           <button
             onClick={() => handleDelete(cred.id)}
-            className="text-red-500 hover:text-red-700"
+            className="text-red-500 hover:text-red-700 transition-colors duration-150 dark:text-red-400 dark:hover:text-red-500"
             aria-label={`Delete ${cred.service}`}
           >
             <Trash2 size={20} />
           </button>
         </div>
-        <p className="text-sm text-gray-500">{cred.username}</p>
+        <p className="text-foreground-secondary text-sm">{cred.username}</p>
         <div className="flex items-center justify-between">
-          <p className="text-md text-gray-800 tracking-wider">
+          <p className="text-foreground text-md tracking-wider">
             {revealed[cred.id] ? cred.password : "••••••••"}
           </p>
           <div className="flex gap-3 items-center justify-end">
             <button
               onClick={() => toggleReveal(cred.id)}
-              className="text-blue-600 hover:text-blue-800"
+              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transition-colors duration-150"
             >
               {revealed[cred.id] ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -56,7 +56,7 @@ export default function CredentialCard({
               onClick={() => {
                 handleCopy(cred.id);
               }}
-              className="text-blue-600 hover:text-blue-800"
+              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transition-colors duration-150"
             >
               {copied[cred.id] ? (
                 <Check size={20} className="text-green-600" />

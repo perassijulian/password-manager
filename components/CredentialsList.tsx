@@ -90,7 +90,9 @@ export default function CredentialsList({
           onClose={() => setToast(null)}
         />
       )}
-      <h2 className="text-xl font-semibold mb-4">Your Credentials</h2>
+      <h2 className="text-foreground text-xl font-semibold mb-4">
+        Your Credentials
+      </h2>
       {credentials.map((cred) => (
         <CredentialCard
           key={cred.id}

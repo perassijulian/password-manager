@@ -15,6 +15,7 @@ export default {
         primary: "var(--color-primary)",
         border: "var(--color-border)",
         "primary-foreground": "var(--color-primary-foreground)",
+        "foreground-secondary": "var(--color-foreground-secondary)",
         "background-secondary": "var(--color-background-secondary)",
         "background-terciary": "var(--color-background-terciary)",
       },

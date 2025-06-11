@@ -9,7 +9,8 @@
   --color-background-secondary: #ffffff;
   --color-background-terciary: #2563eb;
   --color-border: #e5e7eb;
-  --color-foreground: #171717;
+  --color-foreground: #111827;
+  --color-foreground-secondary: #374151;
   --color-primary: #2563eb;
   --color-primary-foreground: #ffffff;
 }
@@ -17,10 +18,11 @@
 /* Dark theme override */
 .dark {
   --color-background: #323232;
-  --color-background-secondary: #202020;
-  --color-background-terciary: #272727;
+  --color-background-secondary: #272727;
+  --color-background-terciary: #202020;
   --color-border: #3c3c3c;
   --color-foreground: #fefefe;
+  --color-foreground-secondary: #6b7280;
   --color-primary: #3b82f6;
   --color-primary-foreground: #fefefe;
 }
