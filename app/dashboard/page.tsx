@@ -17,7 +17,6 @@ export default function Dashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
-  const [darkMode, setDarkMode] = useState(false);
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [toast, setToast] = useState<ToastProps | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,6 +42,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchCredentials() {
+      setToast(null);
       try {
         const res = await secureFetch(
           "/api/credentials",
@@ -50,11 +50,13 @@ export default function Dashboard() {
           deviceId
         );
         const data = await res.json();
-        if (!res.ok) console.error("Failed to load credentials: ", data.error);
-        setToast({
-          message: "Failed to load credentials",
-          type: "error",
-        });
+        if (!res.ok) {
+          console.error("Failed to load credentials: ", data.error);
+          setToast({
+            message: "Failed to load credentials",
+            type: "error",
+          });
+        }
         setCredentials(data.credentials);
       } catch (err: any) {
         setToast({
@@ -86,14 +88,6 @@ export default function Dashboard() {
 
     fetchUser();
   }, [router]);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [darkMode]);
 
   const handleLogout = async () => {
     try {
@@ -137,8 +131,6 @@ export default function Dashboard() {
         />
       </Modal>
       <DashboardHeader
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
         toast={toast}
         setToast={setToast}
         handleLogout={handleLogout}
