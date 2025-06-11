@@ -13,9 +13,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-foreground",
+  primary: "bg-primary text-primary-foreground",
   secondary: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
-  terciary: "bg-background-terciary text-foreground border border-border",
+  terciary:
+    "bg-background-terciary text-primary-foreground border border-border",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

@@ -87,7 +87,7 @@ export default function CredentialForm({
         value={form.service}
         onChange={(e) => setForm({ ...form, service: e.target.value })}
         required
-        className="w-full border rounded-xl p-2 focus:outline-none focus:ring focus:border-blue-300"
+        className="bg-background-secondary text-foreground w-full py-2 px-4 border border-border rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none"
       />
 
       <input
@@ -96,7 +96,7 @@ export default function CredentialForm({
         value={form.username}
         onChange={(e) => setForm({ ...form, username: e.target.value })}
         required
-        className="w-full border rounded-xl p-2 focus:outline-none focus:ring focus:border-blue-300"
+        className="bg-background-secondary text-foreground w-full py-2 px-4 border border-border rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none"
       />
 
       <div className="relative">
@@ -106,12 +106,12 @@ export default function CredentialForm({
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
           required
-          className="w-full border rounded-xl p-2 pr-10 focus:outline-none focus:ring focus:border-blue-300"
+          className="bg-background-secondary text-foreground w-full py-2 px-4 border border-border rounded-xl focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none"
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-blue-600"
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-foreground"
         >
           {showPassword ? <EyeClosed /> : <Eye />}
         </button>

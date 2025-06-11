@@ -50,7 +50,7 @@ export default function TwoFAVerification({
           placeholder="123456"
           maxLength={6}
           {...register("code")}
-          className="bg-background-terciary text-foreground w-full p-1 border border-border rounded-xl text-center text-lg tracking-widest focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none"
+          className="bg-background-secondary text-foreground w-full p-1 border border-border rounded-xl text-center text-lg tracking-widest focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none"
         />
         {errors.code && (
           <p className="text-red-500 text-sm">{errors.code.message}</p>
