@@ -10,7 +10,7 @@ export default function CredentialToggleButton({
   return (
     <button
       onClick={onClick}
-      className="flex items-center justify-center gap-2 w-full max-w-md mx-auto bg-blue-500 text-white px-6 pt-2 pb-4 rounded-t-2xl hover:bg-blue-700 transition"
+      className="bg-background-terciary border border-border text-primary-foreground hover:brightness-95 flex items-center justify-center gap-2 w-full max-w-md mx-auto px-6 pt-2 pb-4 rounded-t-2xl transition"
     >
       {isOpen ? <EyeOff size={18} /> : <Plus size={18} />}
       {isOpen ? "Close Form" : "Add New Credential"}

@@ -42,7 +42,7 @@ export default function CredentialDrawer({
 
       {/* Sliding Form */}
       <div
-        className={`fixed bottom-0 inset-x-0 w-full max-w-md mx-auto z-20 bg-white border-t transition-transform duration-300 ${
+        className={`fixed bottom-0 inset-x-0 w-full max-w-md mx-auto z-20 bg-background-secondary border-t transition-transform duration-300 rounded-t-3xl ${
           showForm ? "translate-y-0" : "translate-y-full"
         }`}
       >

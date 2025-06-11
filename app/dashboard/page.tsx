@@ -110,7 +110,7 @@ export default function Dashboard() {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="relative min-h-screen bg-gray-50 p-4 pb-28 w-full">
+    <div className="bg-background relative min-h-screen p-4 pb-28 w-full">
       <Modal
         isOpen={isModalOpen}
         onClose={() => {

@@ -1,21 +1,32 @@
+/* globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Light theme */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-background: #f9fafb;
+  --color-background-secondary: #ffffff;
+  --color-background-terciary: #2563eb;
+  --color-border: #e5e7eb;
+  --color-foreground: #171717;
+  --color-primary: #2563eb;
+  --color-primary-foreground: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #171717;
-  }
+/* Dark theme override */
+.dark {
+  --color-background: #323232;
+  --color-background-secondary: #202020;
+  --color-background-terciary: #272727;
+  --color-border: #3c3c3c;
+  --color-foreground: #fefefe;
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #fefefe;
 }
 
+/* Optional: fallback for the body */
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
 }
