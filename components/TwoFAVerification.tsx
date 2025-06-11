@@ -35,10 +35,10 @@ export default function TwoFAVerification({
 }: TwoFAVerificationProps) {
   return (
     <>
-      <h1 className="text-2xl font-semibold mb-2 text-center">
+      <h1 className="text-foreground text-2xl font-semibold mb-2 text-center">
         2FA Verification
       </h1>
-      <p className="text-sm text-gray-400 mb-6 text-center">
+      <p className="text-sm text-foreground-secondary mb-6 text-center">
         Enter the 6-digit code from your authenticator app
       </p>
 
@@ -50,7 +50,7 @@ export default function TwoFAVerification({
           placeholder="123456"
           maxLength={6}
           {...register("code")}
-          className="w-full p-2 border border-gray-700 rounded-xl text-center text-lg tracking-widest"
+          className="bg-background-terciary text-foreground w-full p-1 border border-border rounded-xl text-center text-lg tracking-widest focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none"
         />
         {errors.code && (
           <p className="text-red-500 text-sm">{errors.code.message}</p>
