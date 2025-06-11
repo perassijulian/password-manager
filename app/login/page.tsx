@@ -57,9 +57,11 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4"
+        className="bg-background-secondary p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4"
       >
-        <h1 className="text-2xl font-bold text-center">Login</h1>
+        <h1 className="text-foreground text-2xl font-bold text-center">
+          Login
+        </h1>
         {toast && (
           <Toast
             message={toast.message}
@@ -68,21 +70,21 @@ export default function Login() {
           />
         )}
         <div>
-          <label>Email</label>
+          <label className="text-foreground-secondary">Email</label>
           <input
             {...register("email")}
-            className="w-full border px-3 py-2 rounded mt-1"
+            className="bg-background w-full border px-3 py-2 rounded mt-1 focus:ring-2 focus:ring-offset-1 focus:ring-primary focus:outline-none"
           />
           {errors.email && (
             <p className="text-red-500 text-sm">{errors.email.message}</p>
           )}
         </div>
         <div>
-          <label>Password</label>
+          <label className="text-foreground-secondary">Password</label>
           <input
             type="password"
             {...register("password")}
-            className="w-full border px-3 py-2 rounded mt-1"
+            className="bg-background w-full border px-3 py-2 rounded mt-1 focus:ring-2 focus:ring-offset-1 focus:ring-primary focus:outline-none"
           />
           {errors.password && (
             <p className="text-red-500 text-sm">{errors.password.message}</p>

@@ -98,12 +98,14 @@ export default function Setup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-semibold mb-2 text-center">Set up 2FA</h1>
+      <div className="bg-background-secondary p-6 rounded-xl shadow-xl w-full max-w-sm space-y-4">
+        <h1 className="text-foreground text-2xl font-semibold mb-2 text-center">
+          Set up 2FA
+        </h1>
 
         {qrCode ? (
           <>
-            <p className="text-sm text-gray-400 mb-6 text-center">
+            <p className="text-foreground-secondary text-sm mb-6 text-center">
               Scan this QR code with your authenticator app:
             </p>
             <div className="flex justify-center mb-4">
@@ -126,7 +128,7 @@ export default function Setup() {
         ) : renderError !== "" ? (
           <div className="text-sm text-red-500 mx-auto">{renderError}</div>
         ) : (
-          <p className="text-sm text-gray-400 mb-6 text-center">
+          <p className="text-foreground-secondary text-sm mb-6 text-center">
             Loading QR code...
           </p>
         )}
@@ -138,7 +140,7 @@ export default function Setup() {
             placeholder="Enter 6-digit code"
             maxLength={6}
             {...register("code")}
-            className="w-full p-2 border border-gray-700 rounded-xl text-center text-lg tracking-widest"
+            className="bg-background text-foreground w-full p-1 border border-border rounded-xl text-center text-lg tracking-widest focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none"
           />
           {errors.code && (
             <p className="text-red-500 text-sm">{errors.code.message}</p>
