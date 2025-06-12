@@ -37,11 +37,7 @@ export async function middleware(req: NextRequest) {
   // Content Security Policy (CSP)
   const csp =
     process.env.NODE_ENV === "development"
-      ? `default-src 'self'; 
-      script-src 'self' 'nonce-${nonce}';
-      style-src 'self' 'nonce-${nonce}'; 
-      object-src 'none'; 
-      base-uri 'self';`
+      ? `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-src 'self' 'nonce-${nonce}'; object-src 'none'; base-uri 'self';`
       : "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self';";
 
   res.headers.set("Content-Security-Policy", csp);
