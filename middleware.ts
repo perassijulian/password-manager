@@ -6,6 +6,8 @@ const PUBLIC_ROUTES = ["/", "/login", "/signup"];
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
+  // Create nonce for csp
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
   let res: NextResponse;
   // Allow public routes to be accessed without authentication
@@ -35,10 +37,15 @@ export async function middleware(req: NextRequest) {
   // Content Security Policy (CSP)
   const csp =
     process.env.NODE_ENV === "development"
-      ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; object-src 'none'; base-uri 'self';"
+      ? `default-src 'self'; 
+      script-src 'self' 'nonce-${nonce}';
+      style-src 'self' 'nonce-${nonce}'; 
+      object-src 'none'; 
+      base-uri 'self';`
       : "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self';";
 
   res.headers.set("Content-Security-Policy", csp);
+  res.headers.set("x-nonce", nonce);
 
   // Secure headers (browser hardening)
   res.headers.set(
