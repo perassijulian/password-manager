@@ -37,7 +37,7 @@ export async function middleware(req: NextRequest) {
   // Content Security Policy (CSP)
   const csp =
     process.env.NODE_ENV === "development"
-      ? `default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-src 'self' 'nonce-${nonce}'; object-src 'none'; base-uri 'self';`
+      ? `default-src 'self'; object-src 'none'; base-uri 'self'; report-uri /api/csp-report`
       : "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self';";
 
   res.headers.set("Content-Security-Policy", csp);
@@ -68,5 +68,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|favicon.ico).*)"], // Skip static assets
+  matcher: [
+    "/((?!_next|favicon.ico|api/csp-report).*)", // Skip static + CSP route
+  ],
 };
