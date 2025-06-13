@@ -7,9 +7,9 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 type ButtonVariant = "primary" | "secondary" | "terciary";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  ariaLabel?: string;
   isLoading?: boolean;
   variant?: ButtonVariant;
-  asChild?: boolean;
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -22,10 +22,10 @@ const variantStyles: Record<ButtonVariant, string> = {
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
+      ariaLabel,
       children,
       isLoading,
       disabled,
-      asChild = false,
       variant = "primary",
       className,
       type = "button",
@@ -38,6 +38,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type}
         disabled={disabled || isLoading}
+        aria-busy={isLoading}
+        aria-label={ariaLabel}
         className={cn(
           "w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 font-medium transition-colors duration-200 hover:brightness-90 focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
           variantStyles[variant],

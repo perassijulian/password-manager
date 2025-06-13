@@ -20,8 +20,10 @@ export default function Home() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/dashboard">Go to Dashboard</Link>
-          <Button asChild variant="terciary">
+          <Button>
+            <Link href="/dashboard">Go to Dashboard</Link>
+          </Button>
+          <Button variant="terciary">
             <a
               href="https://github.com/perassijulian/password-manager"
               target="_blank"
