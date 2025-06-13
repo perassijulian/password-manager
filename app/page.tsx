@@ -1,12 +1,8 @@
-"use client";
-
 import Button from "@/components/Button";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
-  const router = useRouter();
-
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center px-6">
       <div className="absolute top-4 right-4">
@@ -24,9 +20,7 @@ export default function Home() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button onClick={() => router.push("/dashboard")}>
-            Go to Dashboard
-          </Button>
+          <Link href="/dashboard">Go to Dashboard</Link>
           <Button asChild variant="terciary">
             <a
               href="https://github.com/perassijulian/password-manager"
