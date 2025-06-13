@@ -69,6 +69,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next|favicon.ico|api/csp-report).*)", // Skip static + CSP route
+    "/dashboard/:path*", // Authenticated user pages
+    "/api/:path*", // Protected API routes
   ],
 };
