@@ -7,10 +7,13 @@ export default function ThemeToggleButton() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
     const root = window.document.documentElement;
     const stored = localStorage.getItem("theme");
 
-    if (stored === "dark") {
+    if (stored === "dark" || (!stored && prefersDark)) {
       root.classList.add("dark");
       setIsDark(true);
     } else {
@@ -37,6 +40,7 @@ export default function ThemeToggleButton() {
     <button
       onClick={toggleTheme}
       className="p-2 rounded-full transition"
+      aria-label="Toggle Dark Mode"
       title="Toggle Dark Mode"
     >
       {isDark ? <Sun size={20} /> : <Moon size={20} />}
