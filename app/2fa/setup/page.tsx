@@ -3,20 +3,12 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
-import Toast from "@/components/Toast";
-import Button from "@/components/Button";
+import { codeFormSchema, type CodeFormData } from "@/types/schema";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { useToast } from "@/lib/hooks/useToast";
-
-const formSchema = z.object({
-  code: z
-    .string()
-    .length(6, "Code must be 6 digits")
-    .regex(/^\d+$/, "Only numbers allowed"),
-});
-type FormData = z.infer<typeof formSchema>;
+import Toast from "@/components/Toast";
+import Button from "@/components/Button";
 
 export default function Setup() {
   const [qrCode, setQrCode] = useState("");
@@ -31,7 +23,7 @@ export default function Setup() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(formSchema) });
+  } = useForm<CodeFormData>({ resolver: zodResolver(codeFormSchema) });
 
   useEffect(() => {
     const fetchQrCode = async () => {
@@ -58,7 +50,7 @@ export default function Setup() {
     fetchQrCode();
   }, []);
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: CodeFormData) => {
     try {
       setIsLoading(true);
       const res = await fetch("/api/2fa/verify", {

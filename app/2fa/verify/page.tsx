@@ -3,19 +3,11 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
-import TwoFAVerification from "@/components/TwoFAVerification";
+import { codeFormSchema, type CodeFormData } from "@/types/schema";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { useToast } from "@/lib/hooks/useToast";
-
-const formSchema = z.object({
-  code: z
-    .string()
-    .length(6, "Code must be 6 digits")
-    .regex(/^\d+$/, "Only numbers allowed"),
-});
-type FormData = z.infer<typeof formSchema>;
+import TwoFAVerification from "@/components/TwoFAVerification";
 
 export default function Verify2FA() {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,9 +19,9 @@ export default function Verify2FA() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(formSchema) });
+  } = useForm<CodeFormData>({ resolver: zodResolver(codeFormSchema) });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: CodeFormData) => {
     setIsLoading(true);
     try {
       const res = await fetch("/api/2fa/verify", {
