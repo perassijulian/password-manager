@@ -116,7 +116,7 @@ export default function Login() {
             onClick={() =>
               showToast(
                 "Coming Soon. Please ALWAYS read Terms of Service and Privacy Policy.",
-                "info"
+                "success"
               )
             }
             className="text-blue-500 hover:underline"

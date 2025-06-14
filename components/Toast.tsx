@@ -10,19 +10,19 @@ const toastResources = {
     border: "border-green-500",
     background: "bg-green-100 dark:bg-green-900",
     text: "text-green-800 dark:text-green-200",
-    icon: <CheckCircle className="w-10 h-10" />,
+    icon: <CheckCircle className="w-7 h-7" />,
   },
   error: {
     border: "border-red-500",
     background: "bg-red-100 dark:bg-red-900",
     text: "text-red-800 dark:text-red-200",
-    icon: <XCircle className="w-10 h-10" />,
+    icon: <XCircle className="w-7 h-7" />,
   },
   info: {
     border: "border-blue-500",
     background: "bg-blue-100 dark:bg-blue-900",
     text: "text-blue-800 dark:text-blue-200",
-    icon: <Info className="w-10 h-10" />,
+    icon: <Info className="w-7 h-7" />,
   },
 };
 
@@ -68,7 +68,7 @@ export default function Toast({
             : "opacity-0 scale-90 -translate-y-4"
         )}
       >
-        {icon}
+        <div className="bg-white/50 p-2 rounded-full">{icon}</div>
         <p className="font-medium">{message}</p>
       </div>
     </div>
