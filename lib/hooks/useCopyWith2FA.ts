@@ -3,18 +3,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ToastProps } from "@/types";
+import { ToastType } from "@/types";
 import { secureFetch } from "../secureFetch";
 
 export function useCopyWith2FA({
   deviceId,
-  setToast,
+  showToast,
   setCopied,
   setIsModalOpen,
   setIsVerifying,
 }: {
   deviceId: string | undefined;
-  setToast: (toast: ToastProps | null) => void;
+  showToast: (message: string, type: ToastType) => void;
   setCopied: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
   setIsModalOpen: (isOpen: boolean) => void;
   setIsVerifying: (isVerifying: boolean) => void;
@@ -58,7 +58,7 @@ export function useCopyWith2FA({
         return;
       } else {
         console.error("Failed to copy password:", data.error);
-        setToast({ message: "Failed to copy password", type: "error" });
+        showToast("Failed to copy password", "error");
         return;
       }
     }
@@ -67,29 +67,23 @@ export function useCopyWith2FA({
 
     const result = await safeClipboardWrite(password);
     if (result === "unsupported") {
-      setToast({ message: "Clipboard not supported", type: "error" });
+      showToast("Clipboard not supported", "error");
       return;
     }
     if (result === "error") {
-      setToast({ message: "Failed to copy password", type: "error" });
+      showToast("Failed to copy password", "error");
       return;
     }
     // If we reach here, the password was successfully copied
     // Update copied state to show success
     setCopied((prev) => ({ ...prev, [id]: true }));
     setTimeout(() => setCopied((prev) => ({ ...prev, [id]: false })), 1000);
-    setToast({
-      message: "Password copied to clipboard!",
-      type: "success",
-    });
+    showToast("Password copied to clipboard!", "success");
   };
 
   const handleCopy = async (id: string) => {
     if (!deviceId) {
-      setToast({
-        message: "Device not ready yet. Try again in a second.",
-        type: "error",
-      });
+      showToast("Device not ready yet. Try again in a second.", "error");
       return;
     }
 
@@ -105,7 +99,7 @@ export function useCopyWith2FA({
         return;
       } else {
         console.error("Failed to copy password:", error);
-        setToast({ message: "Failed to copy password", type: "error" });
+        showToast("Failed to copy password", "error");
         return;
       }
     }
@@ -118,17 +112,13 @@ export function useCopyWith2FA({
         await copyPassword(pendingAction.credentialId);
       } catch (error) {
         console.error("Error during 2FA copy action:", error);
-        setToast({
-          message: "Failed to handle 2FA copy action",
-          type: "error",
-        });
+        showToast("Failed to handle 2FA copy action", "error");
         return;
       }
     }
   };
 
   const onSubmit = async (data: FormData) => {
-    setToast(null);
     setIsVerifying(true);
     try {
       const res = await fetch("/api/2fa/verify", {
@@ -145,10 +135,7 @@ export function useCopyWith2FA({
       const result = await res.json();
 
       if (!res.ok) {
-        setToast({
-          message: "Verification failed",
-          type: "error",
-        });
+        showToast("Verification failed", "error");
         console.error("2FA verification error:", result.error);
         return;
       }
@@ -157,7 +144,7 @@ export function useCopyWith2FA({
       setIsModalOpen(false);
       reset();
     } catch (error: any) {
-      setToast({ message: "2FA verification error", type: "error" });
+      showToast("2FA verification error", "error");
       console.error("2FA verification error:", error);
     } finally {
       setIsVerifying(false);

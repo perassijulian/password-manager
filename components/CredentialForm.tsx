@@ -1,21 +1,19 @@
 import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
 import Button from "./Button";
-import { Credential } from "@/types";
+import { Credential, ToastType } from "@/types";
 import { secureFetch } from "@/lib/secureFetch";
 
 interface CredentialFormProps {
   onClick: () => void;
-  setToast: (
-    toast: { message: string; type: "error" | "success" | "info" } | null
-  ) => void;
+  showToast: (message: string, type: ToastType) => void;
   setCredentials: React.Dispatch<React.SetStateAction<Credential[]>>;
   deviceId: string | undefined; // Optional for testing
 }
 
 export default function CredentialForm({
   onClick,
-  setToast,
+  showToast,
   setCredentials,
   deviceId,
 }: CredentialFormProps) {
@@ -44,7 +42,7 @@ export default function CredentialForm({
       // But this gives better security
       const data = await res.json();
       if (res.ok) {
-        setToast({ message: "Credential saved successfully", type: "success" });
+        showToast("Credential saved successfully", "success");
         setCredentials((prev) => [
           ...prev,
           {
@@ -60,17 +58,11 @@ export default function CredentialForm({
           onClick();
         }, 500);
       } else {
-        setToast({
-          message: "Error saving credential",
-          type: "error",
-        });
+        showToast("Error saving credential", "error");
         console.error("Error saving credential:", data.error);
       }
     } catch (err) {
-      setToast({
-        message: "An unexpected error occurred",
-        type: "error",
-      });
+      showToast("An unexpected error occurred", "error");
     } finally {
       setIsLoading(false);
     }

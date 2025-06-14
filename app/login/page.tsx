@@ -8,6 +8,7 @@ import { useState } from "react";
 import { signupSchema } from "@/schemas/userSchema";
 import Toast from "@/components/Toast";
 import Button from "@/components/Button";
+import { useToast } from "@/lib/hooks/useToast";
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -18,14 +19,10 @@ export default function Login() {
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(signupSchema) });
   const router = useRouter();
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "error" | "success" | "info";
-  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast, showToast } = useToast();
 
   const onSubmit = async (data: FormData) => {
-    setToast(null);
     try {
       setIsLoading(true);
       const res = await fetch("/api/login", {
@@ -39,15 +36,16 @@ export default function Login() {
           ? router.push("/2fa/verify")
           : router.push("/2fa/setup");
       } else {
-        setToast({ message: result.error || "Login failed", type: "error" });
+        // showToast({ message: result.error || "Login failed", type: "error" });
+        showToast("Login failed", "error");
         setIsLoading(false);
       }
     } catch (error) {
       console.error("Login error:", error);
-      setToast({
-        message: "An unexpected error occurred. Please try again later.",
-        type: "error",
-      });
+      showToast(
+        "An unexpected error occurred. Please try again later.",
+        "error"
+      );
       setIsLoading(false);
       return;
     }
@@ -62,13 +60,7 @@ export default function Login() {
         <h1 className="text-foreground text-2xl font-bold text-center">
           Login
         </h1>
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
-        )}
+        {toast && <Toast message={toast.message} type={toast.type} />}
         <div>
           <label className="text-foreground-secondary">Email</label>
           <input
@@ -109,11 +101,10 @@ export default function Login() {
           <button
             type="button"
             onClick={() =>
-              setToast({
-                message:
-                  "Coming Soon. Please ALWAYS read Terms of Service and Privacy Policy.",
-                type: "error",
-              })
+              showToast(
+                "Coming Soon. Please ALWAYS read Terms of Service and Privacy Policy.",
+                "info"
+              )
             }
             className="text-blue-500 hover:underline"
           >
@@ -123,11 +114,10 @@ export default function Login() {
           <button
             type="button"
             onClick={() =>
-              setToast({
-                message:
-                  "Coming Soon. Please ALWAYS read Terms of Service and Privacy Policy.",
-                type: "info",
-              })
+              showToast(
+                "Coming Soon. Please ALWAYS read Terms of Service and Privacy Policy.",
+                "info"
+              )
             }
             className="text-blue-500 hover:underline"
           >

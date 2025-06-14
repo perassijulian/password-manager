@@ -8,6 +8,7 @@ import { useState } from "react";
 import { signupSchema } from "@/schemas/userSchema";
 import Toast from "@/components/Toast";
 import Button from "@/components/Button";
+import { useToast } from "@/lib/hooks/useToast";
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -18,14 +19,10 @@ export default function Signup() {
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(signupSchema) });
   const router = useRouter();
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "error" | "success" | "info";
-  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast, showToast } = useToast();
 
   const onSubmit = async (data: FormData) => {
-    setToast(null);
     try {
       setIsLoading(true);
       const res = await fetch("/api/signup", {
@@ -35,26 +32,20 @@ export default function Signup() {
       });
       if (res.ok) {
         setIsLoading(false);
-        setToast({
-          message: "Signup successful! Redirecting to login...",
-          type: "success",
-        });
+        showToast("Signup successful! Redirecting to login...", "success");
         setTimeout(() => {
           router.push("/login");
         }, 2500);
       } else {
         const result = await res.json();
-        setToast({
-          message: result.error || "Signup failed",
-          type: "error",
-        });
+        showToast("Signup failed", "error");
         setIsLoading(false);
       }
     } catch (error) {
-      setToast({
-        message: "An unexpected error occurred. Please try again later.",
-        type: "error",
-      });
+      showToast(
+        "An unexpected error occurred. Please try again later.",
+        "error"
+      );
       setIsLoading(false);
     }
   };
@@ -68,13 +59,7 @@ export default function Signup() {
         <h1 className="text-foreground text-2xl font-bold text-center">
           Sign Up
         </h1>
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
-        )}
+        {toast && <Toast message={toast.message} type={toast.type} />}
         <div>
           <label className="text-foreground-secondary">Email</label>
           <input

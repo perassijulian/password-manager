@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import Toast from "@/components/Toast";
 import Button from "@/components/Button";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
+import { useToast } from "@/lib/hooks/useToast";
 
 const formSchema = z.object({
   code: z
@@ -21,13 +22,10 @@ export default function Setup() {
   const [qrCode, setQrCode] = useState("");
   const [setupUrl, setSetupUrl] = useState("");
   const [renderError, setRenderError] = useState("");
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "error" | "success" | "info";
-  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const deviceId = useDeviceId();
+  const { toast, showToast } = useToast();
 
   const {
     register,
@@ -45,17 +43,14 @@ export default function Setup() {
         const data = await res.json();
         if (!res.ok) {
           console.error("Failed to get QR code: ", data.error);
-          setToast({ message: "Failed to get QR code", type: "error" });
+          showToast("Failed to get QR code", "error");
           return;
         }
         setQrCode(data.qrCode);
         setSetupUrl(data.otpauth);
       } catch (err) {
         console.error(err);
-        setToast({
-          message: "Unable to load QR code. Please try again.",
-          type: "error",
-        });
+        showToast("Unable to load QR code. Please try again.", "error");
         setRenderError("Failed to load QR code. Please try again later.");
       }
     };
@@ -64,7 +59,6 @@ export default function Setup() {
   }, []);
 
   const onSubmit = async (data: FormData) => {
-    setToast(null);
     try {
       setIsLoading(true);
       const res = await fetch("/api/2fa/verify", {
@@ -83,14 +77,11 @@ export default function Setup() {
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        setToast({
-          message: result.error || "Verification failed",
-          type: "error",
-        });
+        showToast("Verification failed", "error");
       }
     } catch (err) {
       console.error(err);
-      setToast({ message: "An unexpected error occurred", type: "error" });
+      showToast("An unexpected error occurred", "error");
     } finally {
       setIsLoading(false);
     }
@@ -114,10 +105,7 @@ export default function Setup() {
             <button
               onClick={() => {
                 navigator.clipboard.writeText(setupUrl);
-                setToast({
-                  message: "Setup link copied to clipboard",
-                  type: "info",
-                });
+                showToast("Setup link copied to clipboard", "info");
                 window.open(setupUrl, "_blank");
               }}
               className="text-sm text-blue-500 hover:underline mx-auto block"
@@ -145,13 +133,7 @@ export default function Setup() {
           {errors.code && (
             <p className="text-red-500 text-sm">{errors.code.message}</p>
           )}
-          {toast && (
-            <Toast
-              message={toast.message}
-              type={toast.type}
-              onClose={() => setToast(null)}
-            />
-          )}
+          {toast && <Toast message={toast.message} type={toast.type} />}
 
           <Button type="submit" disabled={isLoading} isLoading={isLoading}>
             {isLoading ? "Verifying..." : "Activate 2FA"}

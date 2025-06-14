@@ -12,17 +12,18 @@ import { ToastProps } from "@/types";
 import { Credential } from "@/types";
 import { useCopyWith2FA } from "@/lib/hooks/useCopyWith2FA";
 import { secureFetch } from "@/lib/secureFetch";
+import { useToast } from "@/lib/hooks/useToast";
 
 export default function Dashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [credentials, setCredentials] = useState<Credential[]>([]);
-  const [toast, setToast] = useState<ToastProps | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
   const deviceId = useDeviceId();
+  const { toast, showToast } = useToast();
 
   const {
     handleCopy,
@@ -34,7 +35,7 @@ export default function Dashboard() {
     setPendingAction,
   } = useCopyWith2FA({
     deviceId,
-    setToast,
+    showToast,
     setCopied,
     setIsModalOpen,
     setIsVerifying,
@@ -42,7 +43,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchCredentials() {
-      setToast(null);
       try {
         const res = await secureFetch(
           "/api/credentials",
@@ -52,17 +52,11 @@ export default function Dashboard() {
         const data = await res.json();
         if (!res.ok) {
           console.error("Failed to load credentials: ", data.error);
-          setToast({
-            message: "Failed to load credentials",
-            type: "error",
-          });
+          showToast("Failed to load credentials", "error");
         }
         setCredentials(data.credentials);
       } catch (err: any) {
-        setToast({
-          message: "Failed to load credentials",
-          type: "error",
-        });
+        showToast("Failed to load credentials", "error");
         console.error("Error fetching credentials:", err);
       } finally {
         setLoading(false);
@@ -97,13 +91,13 @@ export default function Dashboard() {
       if (res.ok) {
         router.push("/login");
       } else {
-        setToast({ message: "Logout failed", type: "error" });
+        showToast("Logout failed", "error");
       }
     } catch (error) {
-      setToast({
-        message: "An unexpected error occurred. Please try again later.",
-        type: "error",
-      });
+      showToast(
+        "An unexpected error occurred. Please try again later.",
+        "error"
+      );
     }
   };
 
@@ -126,15 +120,10 @@ export default function Dashboard() {
           register={register}
           errors={errors}
           toast={toast}
-          setToast={setToast}
           isLoading={isVerifying}
         />
       </Modal>
-      <DashboardHeader
-        toast={toast}
-        setToast={setToast}
-        handleLogout={handleLogout}
-      />
+      <DashboardHeader toast={toast} handleLogout={handleLogout} />
       <CredentialsList
         credentials={credentials}
         setCredentials={setCredentials}

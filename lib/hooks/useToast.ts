@@ -1,6 +1,5 @@
+import { ToastType } from "@/types";
 import { useCallback, useState } from "react";
-
-type ToastType = "success" | "error" | "info";
 
 export function useToast(duration = 4000) {
   const [toast, setToast] = useState<{

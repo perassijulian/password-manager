@@ -6,6 +6,7 @@ import CredentialCard from "./CredentialCard";
 import { Credential } from "@/types";
 import { secureFetch } from "@/lib/secureFetch";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
+import { useToast } from "@/lib/hooks/useToast";
 
 interface CredentialProps {
   credentials: Credential[];
@@ -21,11 +22,8 @@ export default function CredentialsList({
   copied,
 }: CredentialProps) {
   const [revealed, setRevealed] = useState<{ [key: string]: boolean }>({});
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "error" | "success" | "info";
-  } | null>(null);
   const deviceId = useDeviceId();
+  const { toast, showToast } = useToast();
 
   function toggleReveal(id: string) {
     setRevealed((prev) => {
@@ -56,22 +54,16 @@ export default function CredentialsList({
       const data = await res.json();
 
       if (!res.ok) {
-        setToast({
-          message: "Failed to delete credential",
-          type: "error",
-        });
+        showToast("Failed to delete credential", "error");
         console.error("Failed to delete credential:", data.error);
         return;
       }
 
       setCredentials(credentials.filter((cred: Credential) => cred.id !== id));
-      setToast({
-        message: "Credential deleted successfully",
-        type: "success",
-      });
+      showToast("Credential deleted successfully", "success");
     } catch (error) {
       console.error("Failed to delete credential:", error);
-      setToast({ message: "Failed to delete credential", type: "error" });
+      showToast("Failed to delete credential", "error");
       return;
     }
   };
@@ -83,13 +75,7 @@ export default function CredentialsList({
 
   return (
     <div className="max-w-3xl mx-auto mt-2 space-y-4">
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} />}
       <h2 className="text-foreground text-xl font-semibold mb-4">
         Your Credentials
       </h2>

@@ -5,25 +5,17 @@ import ThemeToggleButton from "./ThemeToggleButton";
 
 interface DashboardHeaderProps {
   toast: ToastProps | null;
-  setToast: (toast: ToastProps | null) => void;
   handleLogout: () => void;
 }
 
 export default function DashboardHeader({
   toast,
-  setToast,
   handleLogout,
 }: DashboardHeaderProps) {
   return (
     <div className="flex justify-between items-center">
       <h1 className="text-foreground text-xl font-bold">Dashboard</h1>
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} />}
       <div className="flex items-center gap-2">
         <ThemeToggleButton />
         <button

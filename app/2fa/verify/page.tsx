@@ -7,6 +7,7 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import TwoFAVerification from "@/components/TwoFAVerification";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
+import { useToast } from "@/lib/hooks/useToast";
 
 const formSchema = z.object({
   code: z
@@ -17,13 +18,10 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function Verify2FA() {
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "error" | "success" | "info";
-  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const deviceId = useDeviceId();
+  const { toast, showToast } = useToast();
 
   const {
     register,
@@ -32,7 +30,6 @@ export default function Verify2FA() {
   } = useForm<FormData>({ resolver: zodResolver(formSchema) });
 
   const onSubmit = async (data: FormData) => {
-    setToast(null);
     setIsLoading(true);
     try {
       const res = await fetch("/api/2fa/verify", {
@@ -51,16 +48,13 @@ export default function Verify2FA() {
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        setToast({
-          message: "Verification failed",
-          type: "error",
-        });
+        showToast("Verification failed", "error");
         console.error("2FA verification error:", result.error);
         return;
       }
     } catch (err) {
       console.error("2FA verify error:", err);
-      setToast({ message: "An unexpected error occurred", type: "error" });
+      showToast("An unexpected error occurred", "error");
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +69,6 @@ export default function Verify2FA() {
           register={register}
           errors={errors}
           toast={toast}
-          setToast={setToast}
           isLoading={isLoading}
         />
       </div>
