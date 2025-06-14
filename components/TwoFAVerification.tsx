@@ -41,6 +41,7 @@ export default function TwoFAVerification({
           autoComplete="one-time-code"
           placeholder="123456"
           maxLength={6}
+          autoFocus
           {...register("code")}
           className="bg-background text-foreground w-full p-1 border border-border rounded-xl text-center text-lg tracking-widest focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none"
         />

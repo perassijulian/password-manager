@@ -128,6 +128,7 @@ export default function Setup() {
             placeholder="Enter 6-digit code"
             maxLength={6}
             {...register("code")}
+            autoFocus
             className="bg-background text-foreground w-full p-1 border border-border rounded-xl text-center text-lg tracking-widest focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none"
           />
           {errors.code && (
