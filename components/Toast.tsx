@@ -55,6 +55,8 @@ export default function Toast({
     <div className="fixed inset-x-0 top-6 z-50 flex justify-center pointer-events-none w-full">
       <div
         role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
         className={cn(
           border,
           background,
