@@ -2,16 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { ToastProps } from "@/types";
+import { cn } from "@/lib/cn";
+import { CheckCircle, Info, XCircle } from "lucide-react";
 
-const toastColors = {
+const toastResources = {
   success: {
     border: "border-green-500",
+    background: "bg-green-100 dark:bg-green-900",
+    text: "text-green-800 dark:text-green-200",
+    icon: <CheckCircle className="w-10 h-10" />,
   },
   error: {
     border: "border-red-500",
+    background: "bg-red-100 dark:bg-red-900",
+    text: "text-red-800 dark:text-red-200",
+    icon: <XCircle className="w-10 h-10" />,
   },
   info: {
     border: "border-blue-500",
+    background: "bg-blue-100 dark:bg-blue-900",
+    text: "text-blue-800 dark:text-blue-200",
+    icon: <Info className="w-10 h-10" />,
   },
 };
 
@@ -39,25 +50,24 @@ export default function Toast({
     };
   }, [duration, onClose]);
 
-  const { border } = toastColors[type];
+  const { border, background, text, icon } = toastResources[type];
   return (
     <div className="fixed inset-x-0 top-6 z-50 flex justify-center pointer-events-none w-full">
       <div
         role="alert"
-        className={`
-          max-w-md w-full mx-6 pointer-events-auto border ${border}
-          border-2 bg-background/40 text-foreground
-          backdrop-blur-md rounded-2xl px-4 py-3 shadow-xl
-          shadow-xl ring-1 ring-black/5 dark:ring-white/10
-          transition-all duration-300 transform
-          ${
-            visible
-              ? "opacity-100 scale-100 translate-y-0"
-              : "opacity-0 scale-90 -translate-y-4"
-          }
-        `}
+        className={cn(
+          border,
+          background,
+          text,
+          "flex items-center gap-4 max-w-md w-full pointer-events-auto border border text-sm font-medium",
+          "backdrop-blur-md rounded-2xl mx-6 px-4 py-3 shadow-xl transition-all duration-300 transform",
+          visible
+            ? "opacity-100 scale-100 translate-y-0"
+            : "opacity-0 scale-90 -translate-y-4"
+        )}
       >
-        <p className="text-sm font-medium">{message}</p>
+        {icon}
+        <p className="font-medium">{message}</p>
       </div>
     </div>
   );

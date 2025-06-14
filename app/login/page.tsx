@@ -112,7 +112,7 @@ export default function Login() {
               setToast({
                 message:
                   "Coming Soon. Please ALWAYS read Terms of Service and Privacy Policy.",
-                type: "info",
+                type: "error",
               })
             }
             className="text-blue-500 hover:underline"
