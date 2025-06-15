@@ -3,7 +3,7 @@ import { encrypt } from "@/lib/crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { withRateLimit } from "@/lib/withRateLimit";
-import { verifyTempToken } from "@/utils/auth";
+import { verifyTempToken } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {

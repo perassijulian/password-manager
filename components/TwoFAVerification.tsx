@@ -1,6 +1,6 @@
 import { UseFormRegister, FieldErrors, SubmitHandler } from "react-hook-form";
-import Toast from "./Toast";
-import Button from "./Button";
+import Toast from "./UI/Toast";
+import Button from "./UI/Button";
 
 type TwoFAFormValues = {
   code: string;

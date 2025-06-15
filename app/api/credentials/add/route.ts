@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/crypto";
 import { z } from "zod";
-import validateSecureRequest from "@/lib/validateSecureRequest";
+import validateSecureRequest from "@/lib/security/validateSecureRequest";
 
 const ParamsSchema = z.object({
   service: z.string().min(1),

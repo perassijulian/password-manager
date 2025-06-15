@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import validateSecureRequest from "@/lib/validateSecureRequest";
+import validateSecureRequest from "@/lib/security/validateSecureRequest";
 
 const ParamsSchema = z.object({
   id: z.string().cuid(),

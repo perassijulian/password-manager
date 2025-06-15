@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import CredentialForm from "./CredentialForm";
-import CredentialToggleButton from "./CredentialToggleButton";
-import Toast from "./Toast";
+import CredentialForm from "@/components/dashboard/CredentialForm";
+import CredentialToggleButton from "@/components/dashboard/CredentialToggleButton";
+import Toast from "@/components/UI/Toast";
 import { Credential } from "@/types";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { useToast } from "@/lib/hooks/useToast";

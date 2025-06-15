@@ -1,8 +1,8 @@
 import { Eye, EyeClosed } from "lucide-react";
 import { useState } from "react";
-import Button from "./Button";
+import Button from "@/components/UI/Button";
 import { Credential, ToastType } from "@/types";
-import { secureFetch } from "@/lib/secureFetch";
+import { secureFetch } from "@/lib/security/secureFetch";
 
 interface CredentialFormProps {
   onClick: () => void;

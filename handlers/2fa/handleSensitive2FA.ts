@@ -1,7 +1,7 @@
-import { verifyUserToken } from "@/utils/auth";
+import { verifyUserToken } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authorizeSensitiveAction } from "@/utils/authorizeSensitiveAction";
+import { authorizeSensitiveAction } from "@/lib/security/authorizeSensitiveAction";
 import { decrypt } from "@/lib/crypto";
 import { verify2FA } from "@/lib/2fa";
 import { ActionType } from "@/types";

@@ -1,7 +1,7 @@
 import { DoorOpen } from "lucide-react";
-import Toast from "@/components/Toast";
+import Toast from "@/components/UI/Toast";
 import { ToastProps } from "@/types";
-import ThemeToggleButton from "./ThemeToggleButton";
+import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 interface DashboardHeaderProps {
   toast: ToastProps | null;

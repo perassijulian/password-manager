@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import CredentialDrawer from "@/components/CredentialDrawer";
-import CredentialsList from "@/components/CredentialsList";
-import Modal from "@/components/Modal";
+import CredentialDrawer from "@/components/dashboard/CredentialDrawer";
+import CredentialsList from "@/components/dashboard/CredentialsList";
+import Modal from "@/components/UI/Modal";
 import TwoFAVerification from "@/components/TwoFAVerification";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
-import DashboardHeader from "@/components/DashboardHeader";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { ToastProps } from "@/types";
 import { Credential } from "@/types";
 import { useCopyWith2FA } from "@/lib/hooks/useCopyWith2FA";
-import { secureFetch } from "@/lib/secureFetch";
+import { secureFetch } from "@/lib/security/secureFetch";
 import { useToast } from "@/lib/hooks/useToast";
 
 export default function Dashboard() {

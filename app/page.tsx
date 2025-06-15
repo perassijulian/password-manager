@@ -1,4 +1,4 @@
-import Button from "@/components/Button";
+import Button from "@/components/UI/Button";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
 import Link from "next/link";
 

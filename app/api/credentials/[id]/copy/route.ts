@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { decrypt } from "@/lib/crypto";
 import { z } from "zod";
-import { authorizeSensitiveAction } from "@/utils/authorizeSensitiveAction";
-import validateSecureRequest from "@/lib/validateSecureRequest";
+import { authorizeSensitiveAction } from "@/lib/security/authorizeSensitiveAction";
+import validateSecureRequest from "@/lib/security/validateSecureRequest";
 
 const ParamsSchema = z.object({
   id: z.string().cuid(),

@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { checkRateLimit } from "./checkRateLimit";
+import { checkRateLimit } from "../rateLimit/checkRateLimit";
 import { validateCsrfRequest } from "./secureCsrf";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/utils/verifyToken";

@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { codeFormSchema, type CodeFormData } from "@/types/schema";
+import { codeFormSchema, type CodeFormData } from "@/schemas/codeSchema";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { useToast } from "@/lib/hooks/useToast";
-import Toast from "@/components/Toast";
-import Button from "@/components/Button";
+import Toast from "@/components/UI/Toast";
+import Button from "@/components/UI/Button";
 
 export default function Setup() {
   const [qrCode, setQrCode] = useState("");

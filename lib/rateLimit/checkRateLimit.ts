@@ -1,5 +1,5 @@
 import { getClientIp } from "@/utils/getClientIp";
-import { rateLimiter } from "@/lib/rateLimiter";
+import { rateLimiter } from "@/lib/rateLimit/rateLimiter";
 import { NextRequest, NextResponse } from "next/server";
 
 type RateLimitResult = { ok: true } | { ok: false; response: NextResponse };

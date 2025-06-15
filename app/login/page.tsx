@@ -6,8 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signupSchema } from "@/schemas/userSchema";
-import Toast from "@/components/Toast";
-import Button from "@/components/Button";
+import Toast from "@/components/UI/Toast";
+import Button from "@/components/UI/Button";
 import { useToast } from "@/lib/hooks/useToast";
 
 type FormData = z.infer<typeof signupSchema>;

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { codeFormSchema, type CodeFormData } from "@/types/schema";
+import { codeFormSchema, type CodeFormData } from "@/schemas/codeSchema";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { useToast } from "@/lib/hooks/useToast";
 import TwoFAVerification from "@/components/TwoFAVerification";

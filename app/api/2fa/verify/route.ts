@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
-import { withRateLimit } from "@/lib/withRateLimit";
+import { withRateLimit } from "@/lib/rateLimit/withRateLimit";
 import { handleLogin2FA } from "@/handlers/2fa/handleLogin2FA";
 import { handleSensitive2FA } from "@/handlers/2fa/handleSensitive2FA";
 import { actionTypeEnum, contextTypeEnum } from "@/types";

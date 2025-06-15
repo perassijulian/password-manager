@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ToastType } from "@/types";
-import { secureFetch } from "../secureFetch";
+import { secureFetch } from "../security/secureFetch";
 
 export function useCopyWith2FA({
   deviceId,

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Toast from "./Toast";
+import Toast from "../UI/Toast";
 import CredentialCard from "./CredentialCard";
 import { Credential } from "@/types";
-import { secureFetch } from "@/lib/secureFetch";
+import { secureFetch } from "@/lib/security/secureFetch";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { useToast } from "@/lib/hooks/useToast";
 

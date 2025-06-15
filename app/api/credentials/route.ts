@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { decrypt } from "@/lib/crypto";
-import validateSecureRequest from "@/lib/validateSecureRequest";
+import validateSecureRequest from "@/lib/security/validateSecureRequest";
 import { z } from "zod";
 
 const ParamsSchema = z.object({});
