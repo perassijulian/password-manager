@@ -1,7 +1,7 @@
 import { UseFormRegister, FieldErrors, SubmitHandler } from "react-hook-form";
-import Toast from "./UI/Toast";
 import Button from "./UI/Button";
 
+// TODO import from types
 type TwoFAFormValues = {
   code: string;
 };
@@ -13,7 +13,6 @@ interface TwoFAVerificationProps {
   onSubmit: SubmitHandler<TwoFAFormValues>;
   register: UseFormRegister<TwoFAFormValues>;
   errors: FieldErrors<TwoFAFormValues>;
-  toast: { message: string; type: "error" | "success" | "info" } | null;
   isLoading: boolean;
 }
 
@@ -22,7 +21,6 @@ export default function TwoFAVerification({
   onSubmit,
   register,
   errors,
-  toast,
   isLoading,
 }: TwoFAVerificationProps) {
   return (
@@ -48,7 +46,6 @@ export default function TwoFAVerification({
         {errors.code && (
           <p className="text-red-500 text-sm">{errors.code.message}</p>
         )}
-        {toast && <Toast message={toast.message} type={toast.type} />}
 
         <Button type="submit" disabled={isLoading} isLoading={isLoading}>
           {isLoading ? "Verifying..." : "Verify"}

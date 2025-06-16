@@ -1,21 +1,16 @@
 import { DoorOpen } from "lucide-react";
-import Toast from "@/components/UI/Toast";
-import { ToastProps } from "@/types";
 import ThemeToggleButton from "@/components/ThemeToggleButton";
 
 interface DashboardHeaderProps {
-  toast: ToastProps | null;
   handleLogout: () => void;
 }
 
 export default function DashboardHeader({
-  toast,
   handleLogout,
 }: DashboardHeaderProps) {
   return (
     <div className="flex justify-between items-center">
       <h1 className="text-foreground text-xl font-bold">Dashboard</h1>
-      {toast && <Toast message={toast.message} type={toast.type} />}
       <div className="flex items-center gap-2">
         <ThemeToggleButton />
         <button

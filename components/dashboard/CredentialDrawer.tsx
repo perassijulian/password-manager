@@ -3,10 +3,9 @@
 import { useState } from "react";
 import CredentialForm from "@/components/dashboard/CredentialForm";
 import CredentialToggleButton from "@/components/dashboard/CredentialToggleButton";
-import Toast from "@/components/UI/Toast";
 import { Credential } from "@/types";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
-import { useToast } from "@/lib/hooks/useToast";
+import { useToast } from "@/contexts/ToastContext";
 
 interface CredentialDrawerProps {
   setCredentials: React.Dispatch<React.SetStateAction<Credential[]>>;
@@ -17,11 +16,10 @@ export default function CredentialDrawer({
 }: CredentialDrawerProps) {
   const [showForm, setShowForm] = useState(false);
   const deviceId = useDeviceId();
-  const { toast, showToast } = useToast();
+  const { showToast } = useToast();
 
   return (
     <div className="w-full max-w-md mx-auto">
-      {toast && <Toast message={toast.message} type={toast.type} />}
       {/* Add New Credential Tab */}
       {!showForm && (
         <div className="fixed bottom-0 inset-x-0 mx-auto w-full max-w-md sm:max-w-lg md:max-w-xl z-30">

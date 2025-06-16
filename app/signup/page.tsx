@@ -6,9 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signupSchema } from "@/schemas/userSchema";
-import Toast from "@/components/UI/Toast";
 import Button from "@/components/UI/Button";
-import { useToast } from "@/lib/hooks/useToast";
+import { useToast } from "@/contexts/ToastContext";
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -20,7 +19,7 @@ export default function Signup() {
   } = useForm<FormData>({ resolver: zodResolver(signupSchema) });
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const { toast, showToast } = useToast();
+  const { showToast } = useToast();
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -59,7 +58,6 @@ export default function Signup() {
         <h1 className="text-foreground text-2xl font-bold text-center">
           Sign Up
         </h1>
-        {toast && <Toast message={toast.message} type={toast.type} />}
         <div>
           <label className="text-foreground-secondary">Email</label>
           <input

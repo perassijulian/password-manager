@@ -1,14 +1,13 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/schemas/userSchema";
-import Toast from "@/components/UI/Toast";
+import { useToast } from "@/contexts/ToastContext";
 import Button from "@/components/UI/Button";
-import { useToast } from "@/lib/hooks/useToast";
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -20,7 +19,7 @@ export default function Login() {
   } = useForm<FormData>({ resolver: zodResolver(signupSchema) });
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const { toast, showToast } = useToast();
+  const { showToast } = useToast();
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -36,7 +35,6 @@ export default function Login() {
           ? router.push("/2fa/verify")
           : router.push("/2fa/setup");
       } else {
-        // showToast({ message: result.error || "Login failed", type: "error" });
         showToast("Login failed", "error");
         setIsLoading(false);
       }
@@ -60,7 +58,6 @@ export default function Login() {
         <h1 className="text-foreground text-2xl font-bold text-center">
           Login
         </h1>
-        {toast && <Toast message={toast.message} type={toast.type} />}
         <div>
           <label className="text-foreground-secondary">Email</label>
           <input
@@ -87,17 +84,6 @@ export default function Login() {
         </Button>
         <p className="text-center text-sm text-gray-500">
           By logging in, you agree to our{" "}
-          {/**
-           * 
-           <a href="/terms" className="text-blue-500 hover:underline">
-            Terms of Service
-          </a>{" "}
-          and{" "}
-          <a href="/privacy" className="text-blue-500 hover:underline">
-            Privacy Policy
-          </a>
-           * 
-           */}
           <button
             type="button"
             onClick={() =>

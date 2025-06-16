@@ -6,9 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { codeFormSchema, type CodeFormData } from "@/schemas/codeSchema";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
-import { useToast } from "@/lib/hooks/useToast";
-import Toast from "@/components/UI/Toast";
 import Button from "@/components/UI/Button";
+import { useToast } from "@/contexts/ToastContext";
 
 export default function Setup() {
   const [qrCode, setQrCode] = useState("");
@@ -17,7 +16,7 @@ export default function Setup() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const deviceId = useDeviceId();
-  const { toast, showToast } = useToast();
+  const { showToast } = useToast();
 
   const {
     register,
@@ -126,7 +125,6 @@ export default function Setup() {
           {errors.code && (
             <p className="text-red-500 text-sm">{errors.code.message}</p>
           )}
-          {toast && <Toast message={toast.message} type={toast.type} />}
 
           <Button type="submit" disabled={isLoading} isLoading={isLoading}>
             {isLoading ? "Verifying..." : "Activate 2FA"}

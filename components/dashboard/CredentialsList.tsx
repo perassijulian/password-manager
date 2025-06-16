@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Toast from "../UI/Toast";
 import CredentialCard from "./CredentialCard";
 import { Credential } from "@/types";
 import { secureFetch } from "@/lib/security/secureFetch";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
-import { useToast } from "@/lib/hooks/useToast";
+import { useToast } from "@/contexts/ToastContext";
 
 interface CredentialProps {
   credentials: Credential[];
@@ -23,7 +22,7 @@ export default function CredentialsList({
 }: CredentialProps) {
   const [revealed, setRevealed] = useState<{ [key: string]: boolean }>({});
   const deviceId = useDeviceId();
-  const { toast, showToast } = useToast();
+  const { showToast } = useToast();
 
   function toggleReveal(id: string) {
     setRevealed((prev) => {
@@ -75,7 +74,6 @@ export default function CredentialsList({
 
   return (
     <div className="max-w-3xl mx-auto mt-2 space-y-4">
-      {toast && <Toast message={toast.message} type={toast.type} />}
       <h2 className="text-foreground text-xl font-semibold mb-4">
         Your Credentials
       </h2>

@@ -8,11 +8,10 @@ import Modal from "@/components/UI/Modal";
 import TwoFAVerification from "@/components/TwoFAVerification";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { ToastProps } from "@/types";
 import { Credential } from "@/types";
 import { useCopyWith2FA } from "@/lib/hooks/useCopyWith2FA";
 import { secureFetch } from "@/lib/security/secureFetch";
-import { useToast } from "@/lib/hooks/useToast";
+import { useToast } from "@/contexts/ToastContext";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -23,7 +22,7 @@ export default function Dashboard() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
   const deviceId = useDeviceId();
-  const { toast, showToast } = useToast();
+  const { showToast } = useToast();
 
   const {
     handleCopy,
@@ -119,11 +118,10 @@ export default function Dashboard() {
           onSubmit={onSubmit}
           register={register}
           errors={errors}
-          toast={toast}
           isLoading={isVerifying}
         />
       </Modal>
-      <DashboardHeader toast={toast} handleLogout={handleLogout} />
+      <DashboardHeader handleLogout={handleLogout} />
       <CredentialsList
         credentials={credentials}
         setCredentials={setCredentials}

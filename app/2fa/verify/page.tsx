@@ -6,14 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { codeFormSchema, type CodeFormData } from "@/schemas/codeSchema";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
-import { useToast } from "@/lib/hooks/useToast";
 import TwoFAVerification from "@/components/TwoFAVerification";
+import { useToast } from "@/contexts/ToastContext";
 
 export default function Verify2FA() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const deviceId = useDeviceId();
-  const { toast, showToast } = useToast();
+  const { showToast } = useToast();
 
   const {
     register,
@@ -60,7 +60,6 @@ export default function Verify2FA() {
           onSubmit={onSubmit}
           register={register}
           errors={errors}
-          toast={toast}
           isLoading={isLoading}
         />
       </div>
