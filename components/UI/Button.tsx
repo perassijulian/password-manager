@@ -30,7 +30,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       disabled,
       variant = "primary",
       className,
-      type = "button",
+      type = "submit",
       asChild = false,
       ...props
     },

@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/schemas/userSchema";
 import { useToast } from "@/contexts/ToastContext";
 import Button from "@/components/UI/Button";
+import Link from "next/link";
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -113,9 +114,9 @@ export default function Login() {
         </p>
         <p className="text-center text-sm text-gray-500">
           Don't have an account?{" "}
-          <a href="/signup" className="text-blue-500 hover:underline">
+          <Link href="/signup" className="text-blue-500 hover:underline">
             Sign Up
-          </a>
+          </Link>
         </p>
       </form>
     </div>

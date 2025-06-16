@@ -2,7 +2,7 @@ import { generate2FASecret, generateQRCode } from "@/lib/2fa";
 import { encrypt } from "@/lib/crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withRateLimit } from "@/lib/withRateLimit";
+import { withRateLimit } from "@/lib/rateLimit/withRateLimit";
 import { verifyTempToken } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
