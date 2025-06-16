@@ -5,7 +5,7 @@ import argon2 from "argon2";
 import { serialize } from "cookie";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { withRateLimit } from "@/lib/withRateLimit";
+import { withRateLimit } from "@/lib/rateLimit/withRateLimit";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const loginSchema = z.object({
