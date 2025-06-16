@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import argon2 from "argon2";
 import { z } from "zod";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { withRateLimit } from "@/lib/withRateLimit";
+import { withRateLimit } from "@/lib/rateLimit/withRateLimit";
 
 const ParamsSchema = z.object({
   email: z.string().email(),
