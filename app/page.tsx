@@ -19,19 +19,21 @@ export default function Home() {
           and a learning showcase.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button>
-            <Link href="/dashboard">Go to Dashboard</Link>
-          </Button>
-          <Button variant="terciary">
-            <a
-              href="https://github.com/perassijulian/password-manager"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+        <div className="flex items-center justify-center gap-2">
+          <Link href="/dashboard" className="w-full">
+            <Button asChild>Go to Dashboard</Button>
+          </Link>
+
+          <a
+            href="https://github.com/perassijulian/password-manager"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full"
+          >
+            <Button asChild variant="terciary">
               View on GitHub
-            </a>
-          </Button>
+            </Button>
+          </a>
         </div>
       </div>
     </main>

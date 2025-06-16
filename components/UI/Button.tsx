@@ -1,5 +1,6 @@
 "use client";
 
+import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/cn";
 import { Loader2 } from "lucide-react";
 import { ButtonHTMLAttributes, forwardRef } from "react";
@@ -10,6 +11,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   ariaLabel?: string;
   isLoading?: boolean;
   variant?: ButtonVariant;
+  asChild?: boolean;
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -29,12 +31,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = "primary",
       className,
       type = "button",
+      asChild = false,
       ...props
     },
     ref
   ) => {
+    const Comp = asChild ? Slot : "button";
     return (
-      <button
+      <Comp
         ref={ref}
         type={type}
         disabled={disabled || isLoading}
@@ -47,9 +51,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-        {children}
-      </button>
+        <span className="flex items-center gap-2">
+          {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+          {children}
+        </span>
+      </Comp>
     );
   }
 );
