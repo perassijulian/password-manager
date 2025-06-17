@@ -1,20 +1,25 @@
 import { rateLimiter } from "@/lib/rateLimit/rateLimiter";
-import { NextResponse } from "next/server";
+import { getClientIp } from "@/utils/getClientIp";
+import { NextRequest, NextResponse } from "next/server";
+import { checkLoginFailLimit } from "./loginFailLimiter";
 
 type RateLimitResult = { ok: true } | { ok: false; response: NextResponse };
 
-export async function checkRateLimit(key: string): Promise<RateLimitResult> {
+export async function checkRateLimit(
+  req: NextRequest,
+  email?: string
+): Promise<RateLimitResult> {
   try {
-    if (!key)
+    // 1. Get client ip and double check we got it
+    const ip = getClientIp(req);
+    if (!ip)
       return {
         ok: false,
-        response: NextResponse.json(
-          { error: "Key not found" },
-          { status: 400 }
-        ),
+        response: NextResponse.json({ error: "Ip not found" }, { status: 400 }),
       };
 
-    const { success } = await rateLimiter.limit(key);
+    // 2. Rate limit by ip
+    const { success } = await rateLimiter.limit(ip);
     if (!success) {
       return {
         ok: false,
@@ -24,15 +29,19 @@ export async function checkRateLimit(key: string): Promise<RateLimitResult> {
         ),
       };
     }
+
+    // 3. Rate limit by email (we got it from /api/login) to avoid brute-force
+    if (email) {
+      const loginLimit = await checkLoginFailLimit(email, req);
+      if (!loginLimit.ok) return loginLimit;
+    }
+
     return { ok: true };
   } catch (error) {
     console.error("Error in rate limit check:", error);
     return {
       ok: false,
-      response: NextResponse.json(
-        { error: "Internal Server Error when rate limit check." },
-        { status: 500 }
-      ),
+      response: NextResponse.json({ error: "Server error." }, { status: 500 }),
     };
   }
 }

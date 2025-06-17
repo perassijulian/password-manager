@@ -1,14 +1,8 @@
-import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
-
-// Reuse redis connection
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+import { redis } from "./redis";
 
 export const rateLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.fixedWindow(5, "1 m"), // 5 requests per minute
+  limiter: Ratelimit.slidingWindow(10, "1 m"), // 10 requests per minute
   analytics: true,
 });
