@@ -18,7 +18,9 @@ export async function POST(req: NextRequest) {
     // 1. Rate Limiting
     return withRateLimit(req, async () => {
       const body = await req.json();
-      const { email, password } = loginSchema.parse(body);
+      let { email, password } = loginSchema.parse(body);
+
+      email = email.toLowerCase().trim();
 
       const user = await prisma.user.findUnique({ where: { email } });
 
