@@ -1,7 +1,7 @@
-import { rateLimiter } from "@/lib/rateLimit/rateLimiter";
+import { sharedLimiter } from "./sharedLimiter";
 import { getClientIp } from "@/utils/getClientIp";
 import { NextRequest, NextResponse } from "next/server";
-import { checkLoginFailLimit } from "./loginFailLimiter";
+import { checkLoginAttempt } from "./loginAttemptLimiter";
 
 type RateLimitResult = { ok: true } | { ok: false; response: NextResponse };
 
@@ -19,7 +19,7 @@ export async function checkRateLimit(
       };
 
     // 2. Rate limit by ip
-    const { success } = await rateLimiter.limit(ip);
+    const { success } = await sharedLimiter.limit(ip);
     if (!success) {
       return {
         ok: false,
@@ -32,7 +32,7 @@ export async function checkRateLimit(
 
     // 3. Rate limit by email (we got it from /api/login) to avoid brute-force
     if (email) {
-      const loginLimit = await checkLoginFailLimit(email, req);
+      const loginLimit = await checkLoginAttempt(email, req);
       if (!loginLimit.ok) return loginLimit;
     }
 

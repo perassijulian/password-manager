@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getClientIp } from "@/utils/getClientIp";
-import { redis } from "./redis";
+import { redis } from "./redisClient";
 
-type LoginFailResult = { ok: true } | { ok: false; response: NextResponse };
-export async function checkLoginFailLimit(
+type LoginAttemptResult = { ok: true } | { ok: false; response: NextResponse };
+export async function checkLoginAttempt(
   email: string,
   req: NextRequest
-): Promise<LoginFailResult> {
+): Promise<LoginAttemptResult> {
   const ip = getClientIp(req);
   const key = `login:fail:${email}_${ip}`;
   const attempts = await redis.incr(key);
