@@ -9,8 +9,9 @@ This document outlines the anti-abuse and privacy-first measures implemented in 
 User Enumeration happens when an attacker can discover if a user exists in the system based on API responses.
 
 Example:
-• Signup returns: "Email already registered" → attacker confirms the email exists.
-• Login returns: "Invalid password" vs "Email not found" → attacker learns which emails are valid.
+
+- Signup returns: "Email already registered" → attacker confirms the email exists.
+- Login returns: "Invalid password" vs "Email not found" → attacker learns which emails are valid.
 
 Even small differences in timing, status codes, or messages can leak information.
 
@@ -27,12 +28,14 @@ return NextResponse.json({ success: true }, { status: 201 });
 ```
 
 If the user does not exist, we:
-• Create the user
-• Send a verification email (TODO implementation)
+
+- Create the user
+- Send a verification email (TODO implementation)
 
 If the user already exists, we:
-• Do not reveal it
-• Optionally send a reminder email instead (TODO implementation)
+
+- Do not reveal it
+- Optionally send a reminder email instead (TODO implementation)
 
 **Why?**
 This way, attackers can’t tell if an email is registered or not — but users still receive appropriate follow-up in their inbox.
@@ -42,8 +45,9 @@ This way, attackers can’t tell if an email is registered or not — but users 
 ### 🔐 Login
 
 When a user logs in, we return the same 401 Unauthorized error whether:
-• The email is invalid
-• The password is wrong
+
+- The email is invalid
+- The password is wrong
 
 ```ts
 if (!user || !(await argon2.verify(user.password, password))) {
@@ -82,9 +86,9 @@ To block brute-force password guessing across accounts, we track failed login at
 const key = `login:fail:${email}_${ip}`;
 ```
 
-    •	On each failed login attempt, we increment the Redis key.
-    •	On first fail, we EXPIRE the key after 5 minutes.
-    •	After 5 failed attempts, we return:
+- On each failed login attempt, we increment the Redis key.
+- On first fail, we EXPIRE the key after 5 minutes.
+- After 5 failed attempts, we return:
 
 ```ts
 return NextResponse.json(
@@ -105,8 +109,9 @@ It prevents a known user’s account from being locked out by a stranger across 
 We never expose raw errors to the user — even rate limit or DB issues.
 
 Instead, we:
-• Return generic messages ("Too many requests", "Server error").
-• Log technical errors in the server console:
+
+- Return generic messages ("Too many requests", "Server error").
+- Log technical errors in the server console:
 
 ```ts
 console.error("Login error:", error);
