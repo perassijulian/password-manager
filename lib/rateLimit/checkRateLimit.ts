@@ -1,24 +1,20 @@
-import { getClientIp } from "@/utils/getClientIp";
 import { rateLimiter } from "@/lib/rateLimit/rateLimiter";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 type RateLimitResult = { ok: true } | { ok: false; response: NextResponse };
 
-export async function checkRateLimit(
-  req: NextRequest
-): Promise<RateLimitResult> {
+export async function checkRateLimit(key: string): Promise<RateLimitResult> {
   try {
-    const ip = getClientIp(req);
-    if (!ip)
+    if (!key)
       return {
         ok: false,
         response: NextResponse.json(
-          { error: "IP address not found" },
+          { error: "Key not found" },
           { status: 400 }
         ),
       };
 
-    const { success } = await rateLimiter.limit(ip);
+    const { success } = await rateLimiter.limit(key);
     if (!success) {
       return {
         ok: false,
