@@ -3,13 +3,17 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import argon2 from "argon2";
 import { z } from "zod";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { withRateLimit } from "@/lib/rateLimit/withRateLimit";
 
 const ParamsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
+
+// 1. Always return a generic success response
+// 2. Internally check if user exists
+// 3. If user exists, send reminder email (optional)
+// 4. If not, create user and send verification email
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,31 +31,31 @@ export async function POST(req: NextRequest) {
       let { password, email } = parseResult.data;
       email = email.toLowerCase().trim();
 
-      // 2. Hash password
-      const hashedPassword = await argon2.hash(password);
-      const user = await prisma.user.create({
-        data: { email, password: hashedPassword },
-      });
+      // 2. Check if user already registered
+      const existingUser = await prisma.user.findUnique({ where: { email } });
 
-      // 3. Return success
+      if (!existingUser) {
+        // 3. Hash password
+        const hashedPassword = await argon2.hash(password);
+        await prisma.user.create({
+          data: { email, password: hashedPassword },
+        });
+
+        // TODO: Send verification email
+        // await sendVerificationEmail(email)
+      } else {
+        // TODO: Send reminder email
+        // await sendReminderEmail(email)
+      }
+
+      // 4. Return success eiter way
       return NextResponse.json(
-        { message: "User created", userId: user.id },
+        { message: "Success signup! You will receive an email shortly" },
         { status: 201 }
       );
     });
   } catch (error) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        return NextResponse.json(
-          { error: "Email already in use" },
-          { status: 409 }
-        );
-      }
-    }
-    console.error("Error in POST /api/signup", error);
-    return NextResponse.json(
-      { error: "Invalid input or server error" },
-      { status: 500 }
-    );
+    console.error("Signup error", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
