@@ -26,7 +26,11 @@ export async function POST(req: NextRequest) {
       async () => {
         const user = await prisma.user.findUnique({ where: { email } });
 
-        if (!user || !(await argon2.verify(user.password, password))) {
+        if (
+          !user ||
+          !user.verifiedAt ||
+          !(await argon2.verify(user.password, password))
+        ) {
           return NextResponse.json(
             { error: "Invalid credentials" },
             { status: 401 }
@@ -51,7 +55,6 @@ export async function POST(req: NextRequest) {
         response.headers.set("Set-Cookie", cookie);
         return response;
       },
-      "email+ip",
       email
     );
   } catch (error) {
