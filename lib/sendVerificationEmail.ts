@@ -9,7 +9,7 @@ export async function sendVerificationEmail(
   token: string
 ): Promise<SendEmailResult> {
   try {
-    const verificationUrl = `${process.env.APP_URL}/verify?token=${encodeURIComponent(token)}`;
+    const verificationUrl = `${process.env.APP_URL}/api/verify?token=${encodeURIComponent(token)}`;
     const res = await resend.emails.send({
       from: "onboarding@resend.dev",
       to: email,
@@ -17,6 +17,13 @@ export async function sendVerificationEmail(
       html: `<p>Click to verify: <a href="${verificationUrl}">${verificationUrl}</a></p>`,
       text: `Verify your account: ${verificationUrl}`,
     });
+    if (res.error) {
+      console.error("Resend API Error:", res.error);
+      return {
+        ok: false,
+        response: NextResponse.json({ error: "Server error" }, { status: 500 }),
+      };
+    }
     return {
       ok: true,
     };

@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
       if (!parsed.success) {
         return NextResponse.json(
-          { error: "Invalid or malformed token" },
+          { success: false, message: "Invalid or malformed token" },
           { status: 400 }
         );
       }
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
       if (!record || record.expiresAt < new Date()) {
         return NextResponse.json(
-          { error: "Invalid or expired token" },
+          { success: false, message: "Invalid or expired token" },
           { status: 400 }
         );
       }
@@ -43,7 +43,8 @@ export async function GET(req: NextRequest) {
 
       await prisma.verificationToken.delete({ where: { token } });
 
-      return NextResponse.redirect(`${process.env.APP_URL}/login`);
+      const redirectUrl = new URL("/login", process.env.APP_URL);
+      return NextResponse.redirect(redirectUrl.toString());
     });
   } catch (error) {
     console.error("Error while verifying email token: ", error);
