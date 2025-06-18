@@ -17,6 +17,7 @@ model User {
   twoFactorEnabled Boolean          @default(false)
   createdAt        DateTime         @default(now())
   TwoFAChallenge   TwoFAChallenge[]
+  verificationToken  VerificationToken?
 }
 
 model Credential {
@@ -28,6 +29,16 @@ model Credential {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model VerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 /// The TwoFAChallenge model represents a 2FA verification attempt by a user.
