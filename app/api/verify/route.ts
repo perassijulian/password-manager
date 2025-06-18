@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { withRateLimit } from "@/lib/rateLimit/withRateLimit";
+import argon2 from "argon2";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -22,14 +23,25 @@ export async function GET(req: NextRequest) {
           { status: 400 }
         );
       }
-
       const token = parsed.data.token;
 
-      const record = await prisma.verificationToken.findUnique({
-        where: { token },
+      const potentialTokens = await prisma.verificationToken.findMany({
+        where: {
+          expiresAt: { gt: new Date() },
+        },
       });
 
-      if (!record || record.expiresAt < new Date()) {
+      let match: (typeof potentialTokens)[number] | null = null;
+
+      for (const entry of potentialTokens) {
+        const isMatch = await argon2.verify(entry.token, token);
+        if (isMatch) {
+          match = entry;
+          break;
+        }
+      }
+
+      if (!match) {
         return NextResponse.json(
           { success: false, message: "Invalid or expired token" },
           { status: 400 }
@@ -37,11 +49,13 @@ export async function GET(req: NextRequest) {
       }
 
       await prisma.user.update({
-        where: { id: record.userId },
+        where: { id: match.userId },
         data: { verifiedAt: new Date() },
       });
 
-      await prisma.verificationToken.delete({ where: { token } });
+      await prisma.verificationToken.delete({
+        where: { id: match.id },
+      });
 
       const redirectUrl = new URL("/login", process.env.APP_URL);
       return NextResponse.redirect(redirectUrl.toString());
