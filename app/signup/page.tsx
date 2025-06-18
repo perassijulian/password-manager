@@ -31,9 +31,12 @@ export default function Signup() {
       });
       if (res.ok) {
         setIsLoading(false);
-        showToast("Signup successful! Redirecting to login...", "success");
+        showToast(
+          "Signup successful! Please check your email to verify your account.",
+          "success"
+        );
         setTimeout(() => {
-          router.push("/login");
+          router.push("/");
         }, 2500);
       } else {
         const result = await res.json();

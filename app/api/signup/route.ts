@@ -6,6 +6,7 @@ import { z } from "zod";
 import { withRateLimit } from "@/lib/rateLimit/withRateLimit";
 import { createVerificationToken } from "@/lib/security/createVerificationToken";
 import { sendVerificationEmail } from "@/lib/sendVerificationEmail";
+import { sendReminderEmail } from "@/lib/sendReminderEmail";
 
 const ParamsSchema = z.object({
   email: z.string().email(),
@@ -49,8 +50,8 @@ export async function POST(req: NextRequest) {
 
         if (!emailSent.ok) return emailSent.response;
       } else {
-        // TODO: Send reminder email
-        // await sendReminderEmail(email)
+        const emailSent = await sendReminderEmail(email);
+        if (!emailSent.ok) return emailSent.response;
       }
 
       // 4. Return success eiter way
