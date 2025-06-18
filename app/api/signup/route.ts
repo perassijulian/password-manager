@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import argon2 from "argon2";
 import { z } from "zod";
 import { withRateLimit } from "@/lib/rateLimit/withRateLimit";
+import { createVerificationToken } from "@/lib/security/createVerificationToken";
+import { sendVerificationEmail } from "@/lib/sendVerificationEmail";
 
 const ParamsSchema = z.object({
   email: z.string().email(),
@@ -35,14 +37,17 @@ export async function POST(req: NextRequest) {
       const existingUser = await prisma.user.findUnique({ where: { email } });
 
       if (!existingUser) {
-        // 3. Hash password
+        // 3. Hash password and create user
         const hashedPassword = await argon2.hash(password);
-        await prisma.user.create({
+        const { id: userId } = await prisma.user.create({
           data: { email, password: hashedPassword },
         });
 
-        // TODO: Send verification email
-        // await sendVerificationEmail(email)
+        // 4. Create token and send verification email
+        const token = await createVerificationToken(userId);
+        const emailSent = await sendVerificationEmail(email, token);
+
+        if (!emailSent.ok) return emailSent.response;
       } else {
         // TODO: Send reminder email
         // await sendReminderEmail(email)
