@@ -53,31 +53,31 @@ export async function handleSensitive2FA(
       },
     });
     return NextResponse.json({ success: true });
+  } else {
+    // 6. If not already auth, verify code
+    const secret = decrypt(user.twoFactorSecret);
+    const valid = verify2FA(secret, code);
+
+    if (!valid) {
+      return NextResponse.json({ error: "Invalid code" }, { status: 403 });
+    }
+
+    // 7. Create twoFAChallenge and return with success: true
+    await prisma.twoFAChallenge.create({
+      data: {
+        userId: user.id,
+        context: "sensitive",
+        deviceId,
+        actionType,
+        method: "TOTP",
+        isVerified: true,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+        verifiedAt: new Date(),
+        ipAddress: req.headers.get("x-forwarded-for") || "Unknown",
+        userAgent: req.headers.get("user-agent") || "Unknown",
+      },
+    });
+
+    return NextResponse.json({ success: true });
   }
-
-  // 6. If not already auth, verify code
-  const secret = decrypt(user.twoFactorSecret);
-  const valid = verify2FA(secret, code);
-
-  if (!valid) {
-    return NextResponse.json({ error: "Invalid code" }, { status: 403 });
-  }
-
-  // 7. Create twoFAChallenge and return with success: true
-  await prisma.twoFAChallenge.create({
-    data: {
-      userId: user.id,
-      context: "sensitive",
-      deviceId,
-      actionType,
-      method: "TOTP",
-      isVerified: true,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-      verifiedAt: new Date(),
-      ipAddress: req.headers.get("x-forwarded-for") || "Unknown",
-      userAgent: req.headers.get("user-agent") || "Unknown",
-    },
-  });
-
-  return NextResponse.json({ success: true });
 }
