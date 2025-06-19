@@ -21,26 +21,28 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findUnique({ where: { email } });
 
+    let emailBody;
     if (user) {
-      const res = await resend.emails.send({
-        from: "onboarding@resend.dev",
-        to: email,
-        subject: "Reset your password",
-        text: "You are receiving this mail because you asked to reset your password.",
-      });
-
-      if (res.error) {
-        console.error("Error when sending reset-password email: ", res.error);
-        return {
-          ok: false,
-          response: NextResponse.json(
-            { error: "Server error" },
-            { status: 500 }
-          ),
-        };
-      }
+      emailBody =
+        "You are receiving this mail because you asked to reset your password.";
+    } else {
+      emailBody =
+        "You are receiving this mail because you asked to reset your password. You are not registered on our db with this mail, please register first";
     }
+    const res = await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to: email,
+      subject: "Password reset",
+      text: emailBody,
+    });
 
+    if (res.error) {
+      console.error("Error when sending reset-password email: ", res.error);
+      return {
+        ok: false,
+        response: NextResponse.json({ error: "Server error" }, { status: 500 }),
+      };
+    }
     // We will return the same response if there's a registered user or if there isn't
     // This way there's no enumeration vulnerability risk
     return NextResponse.json({ ok: true });
