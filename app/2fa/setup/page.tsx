@@ -96,12 +96,14 @@ export default function Setup() {
             <button
               onClick={() => {
                 navigator.clipboard.writeText(setupUrl);
-                showToast("Setup link copied to clipboard", "info");
-                window.open(setupUrl, "_blank");
+                showToast(
+                  "Link copied! Paste it in your authenticator app if you can't scan the QR.",
+                  "info"
+                );
               }}
               className="text-sm text-blue-500 hover:underline mx-auto block"
             >
-              Can't scan? Tap to open or copy link
+              Can't scan? Tap to copy the setup link
             </button>
           </>
         ) : renderError !== "" ? (
