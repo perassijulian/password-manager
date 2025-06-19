@@ -17,8 +17,11 @@ export async function POST(req: NextRequest) {
         where: { id: payload.userId },
       });
 
-      if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      if (!user || !user.verifiedAt) {
+        return NextResponse.json(
+          { error: "Invalid credentials" },
+          { status: 401 }
+        );
       }
 
       const { secret, otpauth } = generate2FASecret(user.email);

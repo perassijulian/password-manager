@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
         if (
           !user ||
-          !user.verifiedAt ||
+          !user.verifiedAt || // Optional: Send a mail to remember user to verify
           !(await argon2.verify(user.password, password))
         ) {
           return NextResponse.json(
