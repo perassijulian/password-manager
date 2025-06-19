@@ -1,10 +1,12 @@
 "use client";
 
 import Button from "@/components/UI/Button";
-import { useToast } from "@/lib/hooks/useToast";
+import { useToast } from "@/contexts/ToastContext";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 export default function ResetPassword() {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { showToast } = useToast();
   const {
     register,
@@ -13,6 +15,7 @@ export default function ResetPassword() {
   } = useForm();
 
   const onSubmit = async (data: any) => {
+    setIsLoading(true);
     try {
       const res = await fetch("/api/reset-password", {
         method: "POST",
@@ -20,18 +23,25 @@ export default function ResetPassword() {
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) {
+      if (res.ok) {
+        showToast(
+          "You will receive a mail with the instructions to reset your password",
+          "success"
+        );
+      } else {
         showToast(
           "Reset password was not able to process, try again later",
           "error"
         );
       }
+      setIsLoading(false);
     } catch (error) {
       console.error("Error when posting to /api/reset-password: ", error);
       showToast(
         "Reset password was not able to process, try again later",
         "error"
       );
+      setIsLoading(false);
     }
   };
 
@@ -53,7 +63,7 @@ export default function ResetPassword() {
             {...register("email")}
           />
         </div>
-        <Button>Send email</Button>
+        <Button isLoading={isLoading}>Send email</Button>
       </form>
     </div>
   );
