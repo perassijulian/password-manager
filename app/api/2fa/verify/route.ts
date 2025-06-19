@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       const parseResult = schema.safeParse(rawParams);
       if (!parseResult.success)
         return NextResponse.json(
-          { error: "Invalid Invalid request parameters" },
+          { error: "Invalid request parameters" },
           { status: 400 }
         );
       const { context, ...data } = parseResult.data;

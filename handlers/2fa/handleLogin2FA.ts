@@ -4,9 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { decrypt } from "@/lib/crypto";
 import { verify2FA } from "@/lib/2fa";
 import jwt from "jsonwebtoken";
-import { randomBytes } from "crypto";
 import { serialize } from "cookie";
 import { ActionType } from "@/types";
+import { randomBytes } from "crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -35,7 +35,7 @@ export async function handleLogin2FA(
   const valid = verify2FA(secret, code);
 
   if (!valid)
-    return NextResponse.json({ error: "Invalid code" }, { status: 403 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   if (!user?.twoFactorEnabled)
     await prisma.user.update({
@@ -64,7 +64,7 @@ export async function handleLogin2FA(
     expiresIn: "1h",
   });
 
-  const csrfToken = crypto.randomUUID();
+  const csrfToken = randomBytes(32).toString("hex");
 
   const response = NextResponse.json({ success: true });
   response.headers.set(
