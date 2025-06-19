@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import createResetPasswordToken from "@/lib/security/createResetPasswordToken";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { z } from "zod";
@@ -23,12 +24,27 @@ export async function POST(req: NextRequest) {
 
     let emailBody;
     if (user) {
-      emailBody =
-        "You are receiving this mail because you asked to reset your password.";
+      const createToken = await createResetPasswordToken(user.id);
+      if (!createToken.ok || !createToken.token) {
+        console.error("Error creating reset password token");
+        return {
+          ok: false,
+          response: NextResponse.json(
+            { error: "Server error" },
+            { status: 500 }
+          ),
+        };
+      } else {
+        const token = createToken.token;
+        const verificationUrl = `${process.env.APP_URL}/api/reset-password?token=${encodeURIComponent(token)}`;
+
+        emailBody = `You are receiving this mail because you asked to reset your password. Please click on this link: ${verificationUrl}`;
+      }
     } else {
       emailBody =
         "You are receiving this mail because you asked to reset your password. You are not registered on our db with this mail, please register first";
     }
+
     const res = await resend.emails.send({
       from: "onboarding@resend.dev",
       to: email,
