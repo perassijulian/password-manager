@@ -1,9 +1,11 @@
 "use client";
 
 import Button from "@/components/UI/Button";
+import { useToast } from "@/lib/hooks/useToast";
 import { useForm } from "react-hook-form";
 
 export default function ResetPassword() {
+  const { showToast } = useToast();
   const {
     register,
     handleSubmit,
@@ -11,7 +13,26 @@ export default function ResetPassword() {
   } = useForm();
 
   const onSubmit = async (data: any) => {
-    console.log(data);
+    try {
+      const res = await fetch("/api/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        showToast(
+          "Reset password was not able to process, try again later",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error when posting to /api/reset-password: ", error);
+      showToast(
+        "Reset password was not able to process, try again later",
+        "error"
+      );
+    }
   };
 
   return (
