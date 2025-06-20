@@ -53,16 +53,19 @@ export default function ChangePassword() {
     const { password, secondPassword } = data;
     if (password === "") {
       showToast("Password is empty, please fill up the form", "error");
+      setIsLoading(false);
       return;
     }
     if (password !== secondPassword) {
       showToast("Both passwords are not matching", "error");
+      setIsLoading(false);
       return;
     }
     const token = searchParams.get("token");
 
     if (!token) {
       showToast("Invalid request. Token is missing", "error");
+      setIsLoading(false);
       return;
     }
 
