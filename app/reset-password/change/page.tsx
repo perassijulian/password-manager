@@ -88,13 +88,18 @@ export default function ChangePassword() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-background-secondary border border-border p-6 rounded-xl shadow-xl w-full max-w-md space-y-2"
+        className="bg-background-secondary p-6 rounded-xl shadow-xl w-full max-w-md space-y-4"
       >
-        <div className="flex flex-col gap-2 w-full">
-          <label className="text-foreground">Create new password</label>
+        <h1 className="text-foreground text-2xl font-bold text-center">
+          Reset your password
+        </h1>
+        <div>
+          <label className="text-foreground-secondary">
+            Create new password
+          </label>
           <input
             type="password"
-            className="bg-background p-2 rounded-l"
+            className="bg-background w-full border px-3 py-2 rounded mt-1 focus:ring-2 focus:ring-offset-1 focus:ring-primary focus:outline-none"
             {...register("password")}
           />
           {errors.password && (
@@ -102,10 +107,12 @@ export default function ChangePassword() {
           )}
         </div>
         <div className="flex flex-col gap-2 w-full">
-          <label className="text-foreground">Confirm your password</label>
+          <label className="text-foreground-secondary">
+            Confirm your password
+          </label>
           <input
             type="password"
-            className="bg-background p-2 rounded-l"
+            className="bg-background w-full border px-3 py-2 rounded mt-1 focus:ring-2 focus:ring-offset-1 focus:ring-primary focus:outline-none"
             {...register("secondPassword")}
           />
           {errors.password && (

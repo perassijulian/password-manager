@@ -2,19 +2,26 @@
 
 import Button from "@/components/UI/Button";
 import { useToast } from "@/contexts/ToastContext";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+const emailSchema = z.object({
+  email: z.string().email(),
+});
+type FormData = z.infer<typeof emailSchema>;
 
 export default function ResetPassword() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { showToast } = useToast();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<FormData>({ resolver: zodResolver(emailSchema) });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { showToast } = useToast();
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
       const res = await fetch("/api/reset-password", {
@@ -49,19 +56,24 @@ export default function ResetPassword() {
     <div className="bg-background min-h-screen flex items-center justify-center">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-background-secondary rounded-xl border border-border p-4 space-y-2 max-w-md shadow-xl"
+        className="bg-background-secondary rounded-xl p-6 space-y-4 w-full max-w-md shadow-xl"
       >
-        <h1 className="text-foreground">Reset your password</h1>
-        <p>
+        <h1 className="text-foreground text-2xl font-bold text-center">
+          Reset your password
+        </h1>
+        <p className="text-foreground-secondary text-sm">
           You will receive an email with instructions on how to reset your
           password
         </p>
-        <div className="text-foreground-secondary flex flex-col space-y-2">
+        <div>
           <label className="text-foreground-secondary">Email</label>
           <input
-            className="bg-background border border-border rounded-l p-2"
+            className="bg-background w-full border px-3 py-2 rounded mt-1 focus:ring-2 focus:ring-offset-1 focus:ring-primary focus:outline-none"
             {...register("email")}
           />
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email.message}</p>
+          )}
         </div>
         <Button isLoading={isLoading}>Send email</Button>
       </form>
