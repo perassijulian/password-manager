@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { withRateLimit } from "@/lib/rateLimit/withRateLimit";
 import createResetPasswordToken from "@/lib/security/createResetPasswordToken";
 import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
@@ -17,56 +18,49 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   try {
-    const rawParams = await req.json();
-    const parsedParams = emailSchema.safeParse(rawParams);
+    return withRateLimit(req, async () => {
+      const rawParams = await req.json();
+      const parsedParams = emailSchema.safeParse(rawParams);
 
-    if (!parsedParams || !parsedParams.data?.email)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      if (!parsedParams || !parsedParams.data?.email)
+        return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
-    const { email } = parsedParams.data;
+      const { email } = parsedParams.data;
 
-    const user = await prisma.user.findUnique({ where: { email } });
+      const user = await prisma.user.findUnique({ where: { email } });
 
-    let emailBody;
-    if (user) {
-      const createToken = await createResetPasswordToken(user.id);
-      if (!createToken.ok || !createToken.token) {
-        console.error("Error creating reset password token");
-        return {
-          ok: false,
-          response: NextResponse.json(
-            { error: "Server error" },
-            { status: 500 }
-          ),
-        };
+      let emailBody;
+      if (user) {
+        const createToken = await createResetPasswordToken(user.id);
+        if (!createToken.ok || !createToken.token) {
+          console.error("Error creating reset password token");
+          return NextResponse.json({ error: "Server error" }, { status: 500 });
+        } else {
+          const token = createToken.token;
+          const verificationUrl = `${process.env.APP_URL}/api/reset-password?token=${encodeURIComponent(token)}`;
+
+          emailBody = `You are receiving this mail because you asked to reset your password. Please click on this link: ${verificationUrl}`;
+        }
       } else {
-        const token = createToken.token;
-        const verificationUrl = `${process.env.APP_URL}/api/reset-password?token=${encodeURIComponent(token)}`;
-
-        emailBody = `You are receiving this mail because you asked to reset your password. Please click on this link: ${verificationUrl}`;
+        emailBody =
+          "You are receiving this mail because you asked to reset your password. You are not registered on our db with this mail, please register first";
       }
-    } else {
-      emailBody =
-        "You are receiving this mail because you asked to reset your password. You are not registered on our db with this mail, please register first";
-    }
 
-    const res = await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: email,
-      subject: "Password reset",
-      text: emailBody,
+      const res = await resend.emails.send({
+        from: "onboarding@resend.dev",
+        to: email,
+        subject: "Password reset",
+        text: emailBody,
+      });
+
+      if (res.error) {
+        console.error("Error when sending reset-password email: ", res.error);
+        return NextResponse.json({ error: "Server error" }, { status: 500 });
+      }
+      // We will return the same response if there's a registered user or if there isn't
+      // This way there's no enumeration vulnerability risk
+      return NextResponse.json({ success: true });
     });
-
-    if (res.error) {
-      console.error("Error when sending reset-password email: ", res.error);
-      return {
-        ok: false,
-        response: NextResponse.json({ error: "Server error" }, { status: 500 }),
-      };
-    }
-    // We will return the same response if there's a registered user or if there isn't
-    // This way there's no enumeration vulnerability risk
-    return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Error when calling reset-password: ", error);
     return NextResponse.json({ error: "Server error." }, { status: 500 });
