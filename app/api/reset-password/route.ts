@@ -69,38 +69,40 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const rawToken = searchParams.get("token");
+    return withRateLimit(req, async () => {
+      const { searchParams } = new URL(req.url);
+      const rawToken = searchParams.get("token");
 
-    const parsedToken = tokenSchema.safeParse({ token: rawToken });
-    if (!parsedToken.success) {
-      console.error(
-        "Error when parsing reset-password token: ",
-        parsedToken.error
-      );
-      return NextResponse.json({ error: "Invalid token" }, { status: 400 });
-    }
-    const { token } = parsedToken.data;
-    const hashedToken = createHash("sha256").update(token).digest("hex");
+      const parsedToken = tokenSchema.safeParse({ token: rawToken });
+      if (!parsedToken.success) {
+        console.error(
+          "Error when parsing reset-password token: ",
+          parsedToken.error
+        );
+        return NextResponse.json({ error: "Invalid token" }, { status: 400 });
+      }
+      const { token } = parsedToken.data;
+      const hashedToken = createHash("sha256").update(token).digest("hex");
 
-    const res = await prisma.passwordResetToken.findUnique({
-      where: { token: hashedToken },
-    });
-
-    if (!res?.userId) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 400 });
-    }
-
-    if (res.expiresAt < new Date()) {
-      await prisma.passwordResetToken.deleteMany({
+      const res = await prisma.passwordResetToken.findUnique({
         where: { token: hashedToken },
       });
-      return NextResponse.json({ error: "Invalid token" }, { status: 400 });
-    }
 
-    return NextResponse.redirect(
-      `${process.env.APP_URL}/reset-password/change?token=${token}`
-    );
+      if (!res?.userId) {
+        return NextResponse.json({ error: "Invalid token" }, { status: 400 });
+      }
+
+      if (res.expiresAt < new Date()) {
+        await prisma.passwordResetToken.deleteMany({
+          where: { token: hashedToken },
+        });
+        return NextResponse.json({ error: "Invalid token" }, { status: 400 });
+      }
+
+      return NextResponse.redirect(
+        `${process.env.APP_URL}/reset-password/change?token=${token}`
+      );
+    });
   } catch (error) {
     console.error("Error when verifying reset-password token: ", error);
     return NextResponse.json({ error: "Server error." }, { status: 500 });
