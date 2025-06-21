@@ -16,6 +16,7 @@ export default function ResetPassword() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(emailSchema) });
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -35,6 +36,7 @@ export default function ResetPassword() {
           "You will receive a mail with the instructions to reset your password",
           "success"
         );
+        reset();
       } else {
         showToast(
           "Reset password was not able to process, try again later",
@@ -53,7 +55,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="bg-background min-h-screen flex items-center justify-center">
+    <div className="bg-background min-h-screen flex items-center justify-center p-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="bg-background-secondary rounded-xl p-6 space-y-4 w-full max-w-md shadow-xl"
@@ -68,7 +70,7 @@ export default function ResetPassword() {
         <div>
           <label className="text-foreground-secondary">Email</label>
           <input
-            className="bg-background w-full border px-3 py-2 rounded mt-1 focus:ring-2 focus:ring-offset-1 focus:ring-primary focus:outline-none"
+            className="bg-background w-full border px-3 py-2 rounded my-2 focus:ring-2 focus:ring-offset-1 focus:ring-primary focus:outline-none"
             {...register("email")}
           />
           {errors.email && (
