@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const emailSchema = z
+const passwordSchema = z
   .object({
     password: z
       .string()
@@ -26,7 +26,7 @@ const emailSchema = z
     path: ["secondPassword"],
   });
 
-type FormData = z.infer<typeof emailSchema>;
+type FormData = z.infer<typeof passwordSchema>;
 
 export default function ChangePassword() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -34,7 +34,7 @@ export default function ChangePassword() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(emailSchema) });
+  } = useForm<FormData>({ resolver: zodResolver(passwordSchema) });
   const { showToast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
