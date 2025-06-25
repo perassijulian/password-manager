@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getClientIp } from "@/utils/getClientIp";
 import { redis } from "./redisClient";
+import { RateLimitError } from "../errors/RateLimitError";
 
-type LoginAttemptResult = { ok: true } | { ok: false; response: NextResponse };
-export async function checkLoginAttempt(
-  email: string,
-  req: NextRequest
-): Promise<LoginAttemptResult> {
+export async function checkLoginAttempt(email: string, req: NextRequest) {
+  // 1. Get client ip and double check we got it
   const ip = getClientIp(req);
+  if (!ip) throw new RateLimitError("IP not found", 400);
+
   const key = `login:fail:${email}_${ip}`;
   const attempts = await redis.incr(key);
 
@@ -16,13 +16,10 @@ export async function checkLoginAttempt(
   }
 
   if (attempts > 3) {
-    return {
-      ok: false,
-      response: NextResponse.json(
-        { error: "Too many requests, please try again later." },
-        { status: 429 }
-      ),
-    };
+    throw new RateLimitError(
+      "Too many login attempts. Please try again later.",
+      429
+    );
   }
 
   return { ok: true }; // no lock
