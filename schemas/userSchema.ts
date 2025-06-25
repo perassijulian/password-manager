@@ -11,3 +11,8 @@ export const signupSchema = z.object({
     .regex(/[^a-zA-Z0-9]/, "Password must contain special character"),
   secondPassword: z.string(),
 });
+
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1, "Password is required"),
+});

@@ -5,24 +5,25 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema } from "@/schemas/userSchema";
+import { loginSchema } from "@/schemas/userSchema";
 import { useToast } from "@/contexts/ToastContext";
 import Button from "@/components/UI/Button";
 import Link from "next/link";
 
-type FormData = z.infer<typeof signupSchema>;
+type FormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(signupSchema) });
+  } = useForm<FormData>({ resolver: zodResolver(loginSchema) });
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const { showToast } = useToast();
 
   const onSubmit = async (data: FormData) => {
+    console.log("submiting");
     try {
       setIsLoading(true);
       const res = await fetch("/api/login", {
