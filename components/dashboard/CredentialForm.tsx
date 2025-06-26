@@ -3,6 +3,7 @@ import { useState } from "react";
 import Button from "@/components/UI/Button";
 import { Credential, ToastType } from "@/types";
 import { secureFetch } from "@/lib/security/secureFetch";
+import { ToastMessages } from "@/lib/toastMessages";
 
 interface CredentialFormProps {
   onClick: () => void;
@@ -42,7 +43,7 @@ export default function CredentialForm({
       // But this gives better security
       const data = await res.json();
       if (res.ok) {
-        showToast("Credential saved successfully", "success");
+        showToast(ToastMessages.credentials.create.success, "success");
         setCredentials((prev) => [
           ...prev,
           {
@@ -58,11 +59,12 @@ export default function CredentialForm({
           onClick();
         }, 500);
       } else {
-        showToast("Error saving credential", "error");
+        showToast(ToastMessages.credentials.create.error, "error");
         console.error("Error saving credential:", data.error);
       }
     } catch (err) {
-      showToast("An unexpected error occurred", "error");
+      console.error("Error on CredentialForm: ", err);
+      showToast(ToastMessages.server.generic, "error");
     } finally {
       setIsLoading(false);
     }

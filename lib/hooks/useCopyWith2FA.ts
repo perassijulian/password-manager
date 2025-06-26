@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ToastType } from "@/types";
 import { secureFetch } from "../security/secureFetch";
+import { ToastMessages } from "../toastMessages";
 
 export function useCopyWith2FA({
   deviceId,
@@ -58,7 +59,7 @@ export function useCopyWith2FA({
         return;
       } else {
         console.error("Failed to copy password:", data.error);
-        showToast("Failed to copy password", "error");
+        showToast(ToastMessages.credentials.copy.error, "error");
         return;
       }
     }
@@ -67,23 +68,23 @@ export function useCopyWith2FA({
 
     const result = await safeClipboardWrite(password);
     if (result === "unsupported") {
-      showToast("Clipboard not supported", "error");
+      showToast(ToastMessages.credentials.copy.unsupported, "error");
       return;
     }
     if (result === "error") {
-      showToast("Failed to copy password", "error");
+      showToast(ToastMessages.credentials.copy.error, "error");
       return;
     }
     // If we reach here, the password was successfully copied
     // Update copied state to show success
     setCopied((prev) => ({ ...prev, [id]: true }));
     setTimeout(() => setCopied((prev) => ({ ...prev, [id]: false })), 1000);
-    showToast("Password copied to clipboard!", "success");
+    showToast(ToastMessages.credentials.copy.success, "success");
   };
 
   const handleCopy = async (id: string) => {
     if (!deviceId) {
-      showToast("Device not ready yet. Try again in a second.", "error");
+      showToast(ToastMessages.device.notReady, "error");
       return;
     }
 
@@ -99,7 +100,7 @@ export function useCopyWith2FA({
         return;
       } else {
         console.error("Failed to copy password:", error);
-        showToast("Failed to copy password", "error");
+        showToast(ToastMessages.credentials.copy.error, "error");
         return;
       }
     }
@@ -112,7 +113,7 @@ export function useCopyWith2FA({
         await copyPassword(pendingAction.credentialId);
       } catch (error) {
         console.error("Error during 2FA copy action:", error);
-        showToast("Failed to handle 2FA copy action", "error");
+        showToast(ToastMessages.credentials.copy.error, "error");
         return;
       }
     }
@@ -135,7 +136,7 @@ export function useCopyWith2FA({
       const result = await res.json();
 
       if (!res.ok) {
-        showToast("Verification failed", "error");
+        showToast(ToastMessages.auth.verificationFailed, "error");
         console.error("2FA verification error:", result.error);
         return;
       }
@@ -144,7 +145,7 @@ export function useCopyWith2FA({
       setIsModalOpen(false);
       reset();
     } catch (error: any) {
-      showToast("2FA verification error", "error");
+      showToast(ToastMessages.server.generic, "error");
       console.error("2FA verification error:", error);
     } finally {
       setIsVerifying(false);

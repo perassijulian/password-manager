@@ -4,6 +4,7 @@ import Button from "@/components/UI/Button";
 import { useToast } from "@/contexts/ToastContext";
 import { cn } from "@/lib/cn";
 import { usePasswordStrength } from "@/lib/hooks/usePasswordStrength";
+import { ToastMessages } from "@/lib/toastMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -45,19 +46,19 @@ export default function ChangePassword() {
     setIsLoading(true);
     const { password, secondPassword } = data;
     if (password === "") {
-      showToast("Password is empty, please fill up the form", "error");
+      showToast(ToastMessages.auth.missingFields, "error");
       setIsLoading(false);
       return;
     }
     if (password !== secondPassword) {
-      showToast("Both passwords are not matching", "error");
+      showToast(ToastMessages.auth.passwordDoesNotMatch, "error");
       setIsLoading(false);
       return;
     }
     const token = searchParams.get("token");
 
     if (!token) {
-      showToast("Invalid request. Token is missing", "error");
+      showToast(ToastMessages.resetPassword.missingToken, "error");
       setIsLoading(false);
       return;
     }
@@ -69,10 +70,10 @@ export default function ChangePassword() {
     });
 
     if (res.ok) {
-      showToast("Your password has been updated!", "success");
+      showToast(ToastMessages.resetPassword.passwordUpdated, "success");
       setTimeout(() => router.push("/login"), 3000);
     } else {
-      showToast("Something went wrong, please try again", "error");
+      showToast(ToastMessages.server.generic, "error");
     }
     setIsLoading(false);
   };

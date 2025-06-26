@@ -6,6 +6,7 @@ import { Credential } from "@/types";
 import { secureFetch } from "@/lib/security/secureFetch";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { useToast } from "@/contexts/ToastContext";
+import { ToastMessages } from "@/lib/toastMessages";
 
 interface CredentialProps {
   credentials: Credential[];
@@ -53,16 +54,16 @@ export default function CredentialsList({
       const data = await res.json();
 
       if (!res.ok) {
-        showToast("Failed to delete credential", "error");
+        showToast(ToastMessages.credentials.delete.error, "error");
         console.error("Failed to delete credential:", data.error);
         return;
       }
 
       setCredentials(credentials.filter((cred: Credential) => cred.id !== id));
-      showToast("Credential deleted successfully", "success");
+      showToast(ToastMessages.credentials.delete.success, "success");
     } catch (error) {
       console.error("Failed to delete credential:", error);
-      showToast("Failed to delete credential", "error");
+      showToast(ToastMessages.server.generic, "error");
       return;
     }
   };

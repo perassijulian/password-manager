@@ -10,6 +10,7 @@ import Button from "@/components/UI/Button";
 import { useToast } from "@/contexts/ToastContext";
 import { usePasswordStrength } from "@/lib/hooks/usePasswordStrength";
 import { cn } from "@/lib/cn";
+import { ToastMessages } from "@/lib/toastMessages";
 
 type FormData = z.infer<typeof signupSchema>;
 
@@ -28,13 +29,13 @@ export default function Signup() {
   const onSubmit = async (data: FormData) => {
     console.log("submit");
     if (!isStrongEnough) {
-      showToast("Password is not strong enough", "error");
+      showToast(ToastMessages.auth.passwordNotStrongEnough, "error");
       setIsLoading(false);
       return;
     }
     const { password, secondPassword, email } = data;
     if (password !== secondPassword) {
-      showToast("Passwords don't match", "error");
+      showToast(ToastMessages.auth.passwordDoesNotMatch, "error");
       setIsLoading(false);
       return;
     }
@@ -47,23 +48,18 @@ export default function Signup() {
       });
       if (res.ok) {
         setIsLoading(false);
-        showToast(
-          "Signup successful! Please check your email to verify your account.",
-          "success"
-        );
+        showToast(ToastMessages.auth.signupSuccess, "success");
         setTimeout(() => {
           router.push("/");
         }, 2500);
       } else {
         const result = await res.json();
-        showToast("Signup failed", "error");
+        showToast(ToastMessages.auth.signupFailed, "error");
         setIsLoading(false);
       }
     } catch (error) {
-      showToast(
-        "An unexpected error occurred. Please try again later.",
-        "error"
-      );
+      console.error("Signup error:", error);
+      showToast(ToastMessages.server.generic, "error");
       setIsLoading(false);
     }
   };

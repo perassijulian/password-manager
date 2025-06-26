@@ -8,6 +8,7 @@ import { codeFormSchema, type CodeFormData } from "@/schemas/codeSchema";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import TwoFAVerification from "@/components/TwoFAVerification";
 import { useToast } from "@/contexts/ToastContext";
+import { ToastMessages } from "@/lib/toastMessages";
 
 export default function Verify2FA() {
   const [isLoading, setIsLoading] = useState(false);
@@ -40,13 +41,13 @@ export default function Verify2FA() {
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        showToast("Verification failed", "error");
+        showToast(ToastMessages.auth.invalid2FA, "error");
         console.error("2FA verification error:", result.error);
         return;
       }
     } catch (err) {
       console.error("2FA verify error:", err);
-      showToast("An unexpected error occurred", "error");
+      showToast(ToastMessages.server.generic, "error");
     } finally {
       setIsLoading(false);
     }

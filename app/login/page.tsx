@@ -9,6 +9,7 @@ import { loginSchema } from "@/schemas/userSchema";
 import { useToast } from "@/contexts/ToastContext";
 import Button from "@/components/UI/Button";
 import Link from "next/link";
+import { ToastMessages } from "@/lib/toastMessages";
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -37,15 +38,12 @@ export default function Login() {
           ? router.push("/2fa/verify")
           : router.push("/2fa/setup");
       } else {
-        showToast("Login failed", "error");
+        showToast(ToastMessages.auth.loginFailed, "error");
         setIsLoading(false);
       }
     } catch (error) {
       console.error("Login error:", error);
-      showToast(
-        "An unexpected error occurred. Please try again later.",
-        "error"
-      );
+      showToast(ToastMessages.server.generic, "error");
       setIsLoading(false);
       return;
     }

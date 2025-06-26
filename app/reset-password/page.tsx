@@ -2,6 +2,7 @@
 
 import Button from "@/components/UI/Button";
 import { useToast } from "@/contexts/ToastContext";
+import { ToastMessages } from "@/lib/toastMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -32,24 +33,15 @@ export default function ResetPassword() {
       });
 
       if (res.ok) {
-        showToast(
-          "You will receive a mail with the instructions to reset your password",
-          "success"
-        );
+        showToast(ToastMessages.resetPassword.success, "success");
         reset();
       } else {
-        showToast(
-          "Reset password was not able to process, try again later",
-          "error"
-        );
+        showToast(ToastMessages.resetPassword.error, "error");
       }
       setIsLoading(false);
     } catch (error) {
       console.error("Error when posting to /api/reset-password: ", error);
-      showToast(
-        "Reset password was not able to process, try again later",
-        "error"
-      );
+      showToast(ToastMessages.server.generic, "error");
       setIsLoading(false);
     }
   };

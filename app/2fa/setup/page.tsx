@@ -8,6 +8,7 @@ import { codeFormSchema, type CodeFormData } from "@/schemas/codeSchema";
 import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import Button from "@/components/UI/Button";
 import { useToast } from "@/contexts/ToastContext";
+import { ToastMessages } from "@/lib/toastMessages";
 
 export default function Setup() {
   const [qrCode, setQrCode] = useState("");
@@ -34,14 +35,14 @@ export default function Setup() {
         const data = await res.json();
         if (!res.ok) {
           console.error("Failed to get QR code: ", data.error);
-          showToast("Failed to get QR code", "error");
+          showToast(ToastMessages.auth.qrFetchFailed, "error");
           return;
         }
         setQrCode(data.qrCode);
         setSetupUrl(data.otpauth);
       } catch (err) {
         console.error(err);
-        showToast("Unable to load QR code. Please try again.", "error");
+        showToast(ToastMessages.auth.qrNetworkError, "error");
         setRenderError("Failed to load QR code. Please try again later.");
       }
     };
@@ -68,11 +69,11 @@ export default function Setup() {
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        showToast("Verification failed", "error");
+        showToast(ToastMessages.auth.verificationFailed, "error");
       }
     } catch (err) {
       console.error(err);
-      showToast("An unexpected error occurred", "error");
+      showToast(ToastMessages.server.generic, "error");
     } finally {
       setIsLoading(false);
     }
@@ -96,10 +97,7 @@ export default function Setup() {
             <button
               onClick={() => {
                 navigator.clipboard.writeText(setupUrl);
-                showToast(
-                  "Link copied! Paste it in your authenticator app if you can't scan the QR.",
-                  "info"
-                );
+                showToast(ToastMessages.auth.setupLinkCopied, "info");
               }}
               className="text-sm text-blue-500 hover:underline mx-auto block"
             >

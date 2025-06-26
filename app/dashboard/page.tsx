@@ -12,6 +12,7 @@ import { Credential } from "@/types";
 import { useCopyWith2FA } from "@/lib/hooks/useCopyWith2FA";
 import { secureFetch } from "@/lib/security/secureFetch";
 import { useToast } from "@/contexts/ToastContext";
+import { ToastMessages } from "@/lib/toastMessages";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -51,11 +52,11 @@ export default function Dashboard() {
         const data = await res.json();
         if (!res.ok) {
           console.error("Failed to load credentials: ", data.error);
-          showToast("Failed to load credentials", "error");
+          showToast(ToastMessages.server.generic, "error");
         }
         setCredentials(data.credentials);
       } catch (err: any) {
-        showToast("Failed to load credentials", "error");
+        showToast(ToastMessages.server.generic, "error");
         console.error("Error fetching credentials:", err);
       } finally {
         setLoading(false);
@@ -90,13 +91,10 @@ export default function Dashboard() {
       if (res.ok) {
         router.push("/login");
       } else {
-        showToast("Logout failed", "error");
+        showToast(ToastMessages.server.generic, "error");
       }
     } catch (error) {
-      showToast(
-        "An unexpected error occurred. Please try again later.",
-        "error"
-      );
+      showToast(ToastMessages.server.generic, "error");
     }
   };
 
