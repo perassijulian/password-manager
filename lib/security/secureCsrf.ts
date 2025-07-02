@@ -1,5 +1,6 @@
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { timingSafeEqual } from "crypto";
+import { CsrfError } from "../errors/SecureRequestError";
 
 function safeCompare(a: string, b: string): boolean {
   const aBuf = Buffer.from(a);
@@ -23,13 +24,15 @@ export function validateCsrfRequest(
     !csrfTokenFromHeader ||
     !safeCompare(csrfTokenFromHeader, csrfTokenFromCookie)
   ) {
-    return { valid: false, error: "Invalid CSRF token" };
+    console.error("CSRF validation failed: Token mismatch or missing");
+    throw new CsrfError();
   }
 
   const deviceId = headers.get("x-device-id");
   if (!deviceId) {
-    return { valid: false, error: "Missing device ID" };
+    console.error("CSRF validation failed: Missing device ID");
+    throw new CsrfError();
   }
 
-  return { valid: true, deviceId };
+  return { deviceId };
 }
