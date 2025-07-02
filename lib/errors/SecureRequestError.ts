@@ -28,3 +28,10 @@ export class UnauthorizedError extends SecureRequestError {
     this.name = "UnauthorizedError";
   }
 }
+
+export class BadRequestError extends SecureRequestError {
+  constructor(message = "Bad request") {
+    super(message, 400);
+    this.name = "BadRequestError";
+  }
+}

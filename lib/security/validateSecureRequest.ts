@@ -6,6 +6,7 @@ import { verifyToken } from "@/utils/verifyToken";
 import { z } from "zod";
 import { JWTPayload } from "@/types";
 import {
+  BadRequestError,
   SecureRequestError,
   UnauthorizedError,
 } from "../errors/SecureRequestError";
@@ -19,11 +20,36 @@ type SuccessResult<T> = {
 };
 type Result<T> = SuccessResult<T> | ErrorResult;
 
+async function getRawParams<T extends z.ZodTypeAny>(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> } | undefined,
+  source: "body" | "params" | "none"
+): Promise<unknown> {
+  if (source === "params") {
+    if (!context?.params) {
+      console.error("Missing URL params context");
+      throw new BadRequestError();
+    }
+    return await context.params;
+  }
+
+  if (source === "body") {
+    try {
+      return await req.json();
+    } catch {
+      console.error("Invalid or missing request body");
+      throw new BadRequestError();
+    }
+  }
+
+  return {}; // "none"
+}
+
 export default async function validateSecureRequest<T extends z.ZodTypeAny>({
   req,
   context,
   ParamsSchema,
-  source,
+  source = "none",
 }: {
   req: NextRequest;
   context?: { params: Promise<{ id: string }> };
@@ -32,29 +58,10 @@ export default async function validateSecureRequest<T extends z.ZodTypeAny>({
 }): Promise<Result<z.infer<T>>> {
   try {
     // 1. Rate Limiting
-    const rateLimitCheck = await checkRateLimit(req);
-    if (!rateLimitCheck.ok) {
-      return { ok: false, response: rateLimitCheck.response };
-    }
+    await checkRateLimit(req);
 
     // 2. Validate route params or body (if provided)
-    let rawParams = {};
-    if (source === "params" && context?.params) {
-      rawParams = await context.params;
-    } else if (source === "body") {
-      try {
-        rawParams = await req.json();
-      } catch (error) {
-        return {
-          ok: false,
-          response: NextResponse.json(
-            { error: "Invalid or missing request body" },
-            { status: 400 }
-          ),
-        };
-      }
-    }
-
+    const rawParams = getRawParams(req, context, source);
     const parseResult = ParamsSchema.safeParse(rawParams);
     if (!parseResult.success) {
       return {
