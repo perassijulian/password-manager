@@ -8,7 +8,7 @@ import { createVerificationToken } from "@/lib/security/createVerificationToken"
 import { sendVerificationEmail } from "@/lib/sendVerificationEmail";
 import { sendReminderEmail } from "@/lib/sendReminderEmail";
 
-const ParamsSchema = z.object({
+const paramsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     return withRateLimit(req, async () => {
       // 1. Validate route params
       const rawParams = await req.json();
-      const parseResult = ParamsSchema.safeParse(rawParams);
+      const parseResult = paramsSchema.safeParse(rawParams);
       if (!parseResult.success) {
         console.error("Invalid request parameters:", parseResult.error);
         return NextResponse.json(

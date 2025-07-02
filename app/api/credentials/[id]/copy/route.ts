@@ -5,7 +5,7 @@ import { z } from "zod";
 import { authorizeSensitiveAction } from "@/lib/security/authorizeSensitiveAction";
 import validateSecureRequest from "@/lib/security/validateSecureRequest";
 
-const ParamsSchema = z.object({
+const paramsSchema = z.object({
   id: z.string().cuid(),
 });
 
@@ -18,7 +18,7 @@ export async function POST(
     const secure = await validateSecureRequest({
       req,
       context,
-      ParamsSchema,
+      paramsSchema,
       source: "params",
     });
     if (!secure.ok) return secure.response;

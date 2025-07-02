@@ -5,7 +5,7 @@ import { decrypt } from "@/lib/crypto";
 import validateSecureRequest from "@/lib/security/validateSecureRequest";
 import { z } from "zod";
 
-const ParamsSchema = z.object({});
+const paramsSchema = z.object({});
 
 type Credential = {
   id: string;
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     // Perform rate limiting, parameter validation, CSRF/device checks, and token authentication
     const secure = await validateSecureRequest({
       req,
-      ParamsSchema,
+      paramsSchema,
       source: "none",
     });
     if (!secure.ok) return secure.response;

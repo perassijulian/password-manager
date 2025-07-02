@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import validateSecureRequest from "@/lib/security/validateSecureRequest";
 
-const ParamsSchema = z.object({
+const paramsSchema = z.object({
   id: z.string().cuid(),
 });
 
@@ -16,7 +16,7 @@ export async function DELETE(
     const secure = await validateSecureRequest({
       req,
       context,
-      ParamsSchema,
+      paramsSchema,
       source: "params",
     });
     if (!secure.ok) return secure.response;

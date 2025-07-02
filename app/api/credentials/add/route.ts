@@ -5,7 +5,7 @@ import { encrypt } from "@/lib/crypto";
 import { z } from "zod";
 import validateSecureRequest from "@/lib/security/validateSecureRequest";
 
-const ParamsSchema = z.object({
+const paramsSchema = z.object({
   service: z.string().min(1),
   username: z.string().min(1),
   password: z.string().min(1),
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     // Perform rate limiting, parameter validation, CSRF/device checks, and token authentication
     const secure = await validateSecureRequest({
       req,
-      ParamsSchema,
+      paramsSchema,
       source: "body",
     });
     if (!secure.ok) return secure.response;
