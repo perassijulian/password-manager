@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/utils/verifyToken";
 import { z } from "zod";
 import { JWTPayload } from "@/types";
+import { UnauthorizedError } from "../errors/SecureRequestError";
 
 type ErrorResult = { ok: false; response: NextResponse };
 type SuccessResult<T> = {
@@ -67,11 +68,10 @@ export default async function validateSecureRequest<T extends z.ZodTypeAny>({
 
   // 4. Auth token
   const token = req.cookies.get("token")?.value;
-  if (!token)
-    return {
-      ok: false,
-      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-    };
+  if (!token) {
+    console.error("No token found on cookies");
+    throw new UnauthorizedError();
+  }
 
   const payload = await verifyToken(token);
   if (!payload)
