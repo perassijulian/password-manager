@@ -20,11 +20,11 @@ type SuccessResult<T> = {
 };
 type Result<T> = SuccessResult<T> | ErrorResult;
 
-async function getRawParams<T extends z.ZodTypeAny>(
+async function getRawParams(
   req: NextRequest,
   context: { params: Promise<{ id: string }> } | undefined,
   source: "body" | "params" | "none"
-): Promise<unknown> {
+): Promise<Record<string, any>> {
   if (source === "params") {
     if (!context?.params) {
       console.error("Missing URL params context");
@@ -45,32 +45,27 @@ async function getRawParams<T extends z.ZodTypeAny>(
   return {}; // "none"
 }
 
-export default async function validateSecureRequest<T extends z.ZodTypeAny>({
+export default async function validateSecureRequest<T>({
   req,
   context,
-  ParamsSchema,
+  paramsSchema,
   source = "none",
 }: {
   req: NextRequest;
   context?: { params: Promise<{ id: string }> };
-  ParamsSchema: T;
-  source: "body" | "params" | "none";
-}): Promise<Result<z.infer<T>>> {
+  paramsSchema: z.ZodType<T>;
+  source?: "body" | "params" | "none";
+}): Promise<Result<T>> {
   try {
     // 1. Rate Limiting
     await checkRateLimit(req);
 
     // 2. Validate route params or body (if provided)
-    const rawParams = getRawParams(req, context, source);
-    const parseResult = ParamsSchema.safeParse(rawParams);
+    const rawParams = await getRawParams(req, context, source);
+    const parseResult = paramsSchema.safeParse(rawParams);
     if (!parseResult.success) {
-      return {
-        ok: false,
-        response: NextResponse.json(
-          { error: "Invalid Invalid request parameters" },
-          { status: 400 }
-        ),
-      };
+      console.error("Request parameter validation failed", parseResult.error);
+      throw new BadRequestError();
     }
 
     // 3. Validate API request (CSRF + device ID)
