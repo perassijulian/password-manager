@@ -5,7 +5,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/utils/verifyToken";
 import { z } from "zod";
 import { JWTPayload } from "@/types";
-import { UnauthorizedError } from "../errors/SecureRequestError";
+import {
+  SecureRequestError,
+  UnauthorizedError,
+} from "../errors/SecureRequestError";
 
 type ErrorResult = { ok: false; response: NextResponse };
 type SuccessResult<T> = {
@@ -27,53 +30,74 @@ export default async function validateSecureRequest<T extends z.ZodTypeAny>({
   ParamsSchema: T;
   source: "body" | "params" | "none";
 }): Promise<Result<z.infer<T>>> {
-  // 1. Rate Limiting
-  const rateLimitCheck = await checkRateLimit(req);
-  if (!rateLimitCheck.ok) {
-    return { ok: false, response: rateLimitCheck.response };
-  }
+  try {
+    // 1. Rate Limiting
+    const rateLimitCheck = await checkRateLimit(req);
+    if (!rateLimitCheck.ok) {
+      return { ok: false, response: rateLimitCheck.response };
+    }
 
-  // 2. Validate route params or body (if provided)
-  let rawParams = {};
-  if (source === "params" && context?.params) {
-    rawParams = await context.params;
-  } else if (source === "body") {
-    try {
-      rawParams = await req.json();
-    } catch (error) {
+    // 2. Validate route params or body (if provided)
+    let rawParams = {};
+    if (source === "params" && context?.params) {
+      rawParams = await context.params;
+    } else if (source === "body") {
+      try {
+        rawParams = await req.json();
+      } catch (error) {
+        return {
+          ok: false,
+          response: NextResponse.json(
+            { error: "Invalid or missing request body" },
+            { status: 400 }
+          ),
+        };
+      }
+    }
+
+    const parseResult = ParamsSchema.safeParse(rawParams);
+    if (!parseResult.success) {
       return {
         ok: false,
         response: NextResponse.json(
-          { error: "Invalid or missing request body" },
+          { error: "Invalid Invalid request parameters" },
           { status: 400 }
         ),
       };
     }
-  }
 
-  const parseResult = ParamsSchema.safeParse(rawParams);
-  if (!parseResult.success) {
+    // 3. Validate API request (CSRF + device ID)
+    const cookieStore = await cookies();
+    const { deviceId } = validateCsrfRequest(req.headers, cookieStore);
+
+    // 4. Auth token
+    const token = req.cookies.get("token")?.value;
+    if (!token) {
+      console.error("No token found on cookies");
+      throw new UnauthorizedError();
+    }
+
+    const payload = await verifyToken(token);
+
+    return { ok: true, parsedParams: parseResult.data, payload, deviceId };
+  } catch (error) {
+    if (error instanceof SecureRequestError) {
+      return {
+        ok: false,
+        response: NextResponse.json(
+          { error: error.message },
+          { status: error.status }
+        ),
+      };
+    }
+
+    console.error("Unexpected error during secure request validation:", error);
     return {
       ok: false,
       response: NextResponse.json(
-        { error: "Invalid Invalid request parameters" },
-        { status: 400 }
+        { error: "Internal server error" },
+        { status: 500 }
       ),
     };
   }
-
-  // 3. Validate API request (CSRF + device ID)
-  const cookieStore = await cookies();
-  const { deviceId } = validateCsrfRequest(req.headers, cookieStore);
-
-  // 4. Auth token
-  const token = req.cookies.get("token")?.value;
-  if (!token) {
-    console.error("No token found on cookies");
-    throw new UnauthorizedError();
-  }
-
-  const payload = await verifyToken(token);
-
-  return { ok: true, parsedParams: parseResult.data, payload, deviceId };
 }
