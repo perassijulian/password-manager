@@ -1,5 +1,6 @@
 import { jwtVerify } from "jose";
 import type { JWTPayload } from "@/types";
+import { UnauthorizedError } from "@/lib/errors/SecureRequestError";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error("JWT_SECRET not set");
@@ -18,8 +19,10 @@ export async function verifyToken(token: string) {
       } as JWTPayload;
     }
 
-    return null;
-  } catch {
-    return null;
+    console.error("Invalid token");
+    throw new UnauthorizedError();
+  } catch (error) {
+    console.error("Error while verifying token: ", error);
+    throw new UnauthorizedError();
   }
 }

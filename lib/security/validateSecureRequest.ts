@@ -74,11 +74,6 @@ export default async function validateSecureRequest<T extends z.ZodTypeAny>({
   }
 
   const payload = await verifyToken(token);
-  if (!payload)
-    return {
-      ok: false,
-      response: NextResponse.json({ error: "Invalid token" }, { status: 403 }),
-    };
 
   return { ok: true, parsedParams: parseResult.data, payload, deviceId };
 }
