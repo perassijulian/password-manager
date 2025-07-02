@@ -63,23 +63,7 @@ export default async function validateSecureRequest<T extends z.ZodTypeAny>({
 
   // 3. Validate API request (CSRF + device ID)
   const cookieStore = await cookies();
-  const validation = validateCsrfRequest(req.headers, cookieStore);
-  if (!validation.valid) {
-    return {
-      ok: false,
-      response: NextResponse.json({ error: validation.error }, { status: 403 }),
-    };
-  }
-  const deviceId = validation.deviceId;
-  if (!deviceId) {
-    return {
-      ok: false,
-      response: NextResponse.json(
-        { error: "Device ID missing" },
-        { status: 400 }
-      ),
-    };
-  }
+  const { deviceId } = validateCsrfRequest(req.headers, cookieStore);
 
   // 4. Auth token
   const token = req.cookies.get("token")?.value;
